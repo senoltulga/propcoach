@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { getClientWithTokens } from '@/lib/google'
 import { google } from 'googleapis'
+import ComposeMailButton from './ComposeMailButton'
 
 interface GmailMessage {
   id: string
@@ -272,15 +273,7 @@ export default async function MailPage() {
           </p>
         </div>
 
-        {/* Yeni Mail — devre dışı */}
-        <button
-          disabled
-          title="Yakında"
-          className="px-4 py-2 bg-gray-200 text-gray-400 text-sm rounded-lg cursor-not-allowed select-none"
-        >
-          + Yeni Mail
-          <span className="ml-1.5 text-xs font-normal opacity-70">(Yakında)</span>
-        </button>
+        {isConnected && <ComposeMailButton />}
       </div>
 
       {/* Bağlı değilse büyük CTA */}

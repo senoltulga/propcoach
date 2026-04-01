@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { google } from 'googleapis'
 import { getClientWithTokens } from '@/lib/google'
 import Link from 'next/link'
+import NewEventButton from './NewEventButton'
 
 interface GoogleEvent {
   id?: string | null
@@ -95,14 +96,7 @@ export default async function TakvimPage() {
             <h1 className="text-xl font-bold text-gray-900">Takvim</h1>
             <p className="text-sm text-gray-500 mt-0.5">{monthName}</p>
           </div>
-          <button
-            disabled
-            className="px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg opacity-50 cursor-not-allowed flex items-center gap-2"
-            title="Yakında"
-          >
-            + Etkinlik Ekle
-            <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full">Yakında</span>
-          </button>
+          <NewEventButton />
         </div>
 
         {/* Bağlı hesap bilgisi */}
@@ -236,14 +230,7 @@ export default async function TakvimPage() {
           <h1 className="text-xl font-bold text-gray-900">Takvim</h1>
           <p className="text-sm text-gray-500 mt-0.5">{monthName}</p>
         </div>
-        <button
-          disabled
-          className="px-4 py-2 bg-emerald-600 text-white text-sm rounded-lg opacity-50 cursor-not-allowed flex items-center gap-2"
-          title="Yakında"
-        >
-          + Etkinlik Ekle
-          <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full">Yakında</span>
-        </button>
+        <NewEventButton />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
