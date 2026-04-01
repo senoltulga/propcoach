@@ -1,36 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PropCoach
 
-## Getting Started
+> Gayrimenkul ofisleri ve danışmanlar için AI destekli koçluk ve mentorlük platformu.
 
-First, run the development server:
+## Nedir?
+
+PropCoach, Türkiye'deki gayrimenkul ofislerine ve bağımsız danışmanlara yönelik bir mikro SaaS ürünüdür. Platform iki temel sorunu çözer:
+
+- **Ofis sahipleri** danışman performansını ve portföy durumunu gerçek zamanlı izleyemez
+- **Danışmanlar** kişiselleştirilmiş koçluk ve gelişim desteği alamaz
+
+PropCoach bu boşluğu AI destekli koçluk motoru ve performans takip araçlarıyla doldurur.
+
+---
+
+## Özellikler (MVP)
+
+### Kurumsal (Ofis) Modülü
+- Danışman performans tablosu (satış, müşteri, kapanış oranı, hedefe ulaşma)
+- KPI paneli (aylık ciro, aktif müşteri, görüşme→kapanış oranı)
+- Portföy yönetimi (aktif ilanlar, 90+ gün takibi, KRB dosyası durumu)
+- Danışman detay sayfası (6 sekme: trend, müşteriler, portföy, geçmiş, eğitim, AI öneri)
+- AI koçluk motoru (otomatik zayıf alan tespiti + kişiselleştirilmiş öneri)
+
+### Bireysel (Danışman) Modülü
+- Kişisel performans dashboard'u
+- Müşteri takip listesi
+- Kişisel portföy yönetimi
+- AI koçluk seansı
+
+---
+
+## Teknoloji Stack
+
+| Katman | Teknoloji |
+|--------|-----------|
+| Frontend | Next.js 14 (App Router) |
+| Backend / Auth | Supabase |
+| Veritabanı | PostgreSQL (Supabase) |
+| AI / LLM | Claude API (Anthropic) |
+| RAG | Supabase pgvector |
+| Deployment | Vercel |
+| Ödeme | Stripe / Iyzico |
+
+---
+
+## Kurulum
 
 ```bash
+# Repoyu klonla
+git clone https://github.com/kullanici/propcoach.git
+cd propcoach
+
+# Bağımlılıkları yükle
+npm install
+
+# Ortam değişkenlerini ayarla
+cp .env.example .env.local
+# .env.local dosyasını düzenle (Supabase + Anthropic anahtarları)
+
+# Geliştirme sunucusunu başlat
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Gerekli Ortam Değişkenleri
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+NEXT_PUBLIC_SUPABASE_URL=...
+NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+SUPABASE_SERVICE_ROLE_KEY=...
+ANTHROPIC_API_KEY=...
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Proje Yapısı
 
-To learn more about Next.js, take a look at the following resources:
+```
+propcoach/
+├── app/
+│   ├── (auth)/          # Giriş, kayıt, abonelik
+│   ├── dashboard/       # Ofis sahibi ana sayfa
+│   ├── danisман/        # Danışman detay sayfaları
+│   ├── portfoy/         # Portföy yönetimi
+│   └── api/             # API route'ları (AI, webhooks)
+├── components/          # Yeniden kullanılabilir UI bileşenleri
+├── lib/
+│   ├── supabase/        # DB istemcisi ve sorgular
+│   ├── ai/              # Claude API entegrasyonu
+│   └── rag/             # Doküman işleme ve vektör arama
+├── types/               # TypeScript tip tanımları
+└── public/
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Kullanıcı Tipleri
 
-## Deploy on Vercel
+| Tip | Açıklama |
+|-----|----------|
+| `office_owner` | Ofis sahibi / broker — tam yetki |
+| `office_manager` | Ofis yöneticisi — operasyonel yetki |
+| `agent_linked` | Ofise bağlı danışman |
+| `agent_independent` | Bağımsız danışman |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Katkı
+
+Bu proje aktif geliştirme aşamasındadır. Katkı rehberi yakında eklenecektir.
+
+---
+
+## Lisans
+
+Özel lisans — tüm hakları saklıdır.

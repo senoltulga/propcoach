@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PropCoach — Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a;display:grid;grid-template-columns:210px 1fr;height:100vh;overflow:hidden}
+.sidebar{background:#0F6E56;display:flex;flex-direction:column;overflow-y:auto}
+.sb-logo{font-size:15px;font-weight:600;color:#fff;padding:1.25rem 1.25rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.1)}
+.sb-section{font-size:10px;font-weight:600;color:#5DCAA5;padding:1rem 1.25rem 0.5rem;letter-spacing:.07em;text-transform:uppercase}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 1.25rem;font-size:13px;color:#9FE1CB;cursor:pointer}
+.sb-item:hover{background:rgba(255,255,255,0.08)}
+.sb-item.active{background:rgba(255,255,255,0.15);color:#fff}
+.sb-footer{margin-top:auto;padding:1rem 1.25rem;border-top:1px solid rgba(255,255,255,0.1)}
+.sb-avatar{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,0.2);color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.sb-name{font-size:12px;color:#9FE1CB;margin-left:8px}
+.sb-role{font-size:10px;color:#5DCAA5;margin-left:8px}
+.main{display:flex;flex-direction:column;overflow:hidden;background:#f9f9f7}
+.topbar{background:#fff;border-bottom:1px solid #eee;padding:.875rem 1.5rem;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.topbar-title{font-size:15px;font-weight:600}
+.topbar-meta{font-size:12px;color:#888;margin-top:2px}
+.content{flex:1;overflow-y:auto;padding:1.25rem 1.5rem}
+.page{display:none}.page.active{display:block}
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem}
+.kpi{background:#f1f0e8;border-radius:8px;padding:12px 14px}
+.kpi-label{font-size:11px;color:#888;margin-bottom:5px}
+.kpi-val{font-size:20px;font-weight:600}
+.kpi-sub{font-size:11px;margin-top:4px}
+.up{color:#3B6D11}.down{color:#A32D2D}
+.two-col{display:grid;grid-template-columns:1.6fr 1fr;gap:12px;margin-bottom:12px}
+.card{background:#fff;border:1px solid #eee;border-radius:12px;padding:1rem 1.25rem}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.card-title{font-size:13px;font-weight:600}
+.card-btn{font-size:11px;padding:4px 10px;border:1px solid #ddd;border-radius:6px;cursor:pointer;background:#fff;color:#666}
+.card-btn:hover{background:#f5f5f5}
+table{width:100%;font-size:12px;border-collapse:collapse}
+th{font-size:11px;font-weight:600;color:#888;text-align:left;padding:0 8px 8px 0;border-bottom:1px solid #eee}
+td{padding:8px 8px 8px 0;border-bottom:1px solid #f5f5f5;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr.clickable{cursor:pointer}
+tr.clickable:hover td{background:#fafaf8}
+.av{width:26px;height:26px;border-radius:50%;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center}
+.av-g{background:#EAF3DE;color:#3B6D11}.av-w{background:#FAEEDA;color:#854F0B}
+.av-d{background:#FCEBEB;color:#A32D2D}.av-i{background:#E6F1FB;color:#185FA5}
+.av-s{background:#f1f0e8;color:#5F5E5A}
+.bar-w{width:72px;background:#f1f0e8;border-radius:4px;height:4px}
+.bar{height:4px;border-radius:4px}
+.badge{font-size:10px;padding:2px 7px;border-radius:20px;font-weight:600;display:inline-block}
+.b-ok{background:#EAF3DE;color:#3B6D11}.b-warn{background:#FAEEDA;color:#854F0B}
+.b-danger{background:#FCEBEB;color:#A32D2D}.b-info{background:#E6F1FB;color:#185FA5}
+.pf-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f5f5f5;font-size:12px}
+.pf-row:last-child{border-bottom:none}
+.pf-label{font-size:11px;color:#888;margin-bottom:2px}
+.pf-val{font-weight:600;font-size:14px}
+.alert{background:#FAEEDA;border:1px solid #FAC775;border-radius:8px;padding:10px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;margin-top:12px}
+.alert-t{font-size:12px;font-weight:600;color:#854F0B}
+.alert-s{font-size:11px;color:#854F0B;opacity:.8;margin-top:2px}
+.ilan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.ilan{background:#fff;border:1px solid #eee;border-radius:12px;overflow:hidden;cursor:pointer}
+.ilan:hover{border-color:#ccc}
+.ilan.danger{border-left:3px solid #E24B4A}
+.ilan.warn{border-left:3px solid #EF9F27}
+.ilan-img{height:64px;background:#f9f9f7;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa;position:relative}
+.ilan-img-badge{position:absolute;top:6px;right:6px}
+.ilan-body{padding:10px}
+.ilan-title{font-size:12px;font-weight:600;margin-bottom:3px}
+.ilan-price{font-size:13px;font-weight:600;margin-bottom:5px}
+.ilan-meta{font-size:11px;color:#888;margin-bottom:6px}
+.ilan-foot{display:flex;justify-content:space-between;align-items:center;padding-top:6px;border-top:1px solid #f5f5f5}
+.ilan-dan{font-size:11px;color:#888}
+.krb-pill{font-size:10px;padding:2px 7px;border:1px solid #ddd;border-radius:6px;color:#888}
+.krb-pill.has{border-color:#C0DD97;color:#3B6D11;background:#EAF3DE}
+.vt{display:flex;border:1px solid #ddd;border-radius:6px;overflow:hidden}
+.vt-btn{padding:5px 12px;font-size:12px;cursor:pointer;background:#fff;color:#888;border:none}
+.vt-btn.active{background:#f5f5f5;color:#1a1a1a;font-weight:600}
+.ai-card{background:#FAEEDA;border:1px solid #FAC775;border-radius:12px;padding:1rem 1.25rem;margin-bottom:12px}
+.ai-head{font-size:13px;font-weight:600;color:#854F0B;margin-bottom:10px}
+.ai-item{font-size:12px;color:#854F0B;padding:6px 0;border-bottom:1px solid #FAC775;display:flex;gap:8px}
+.ai-item:last-child{border-bottom:none}
+.ai-dot{width:5px;height:5px;border-radius:50%;background:#854F0B;margin-top:5px;flex-shrink:0}
+.ai-cta{width:100%;padding:10px;font-size:13px;cursor:pointer;border-radius:8px;border:1px solid #FAC775;background:#FAEEDA;color:#854F0B;font-weight:600;margin-top:10px}
+.ai-cta:hover{opacity:.85}
+</style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sb-logo">PropCoach</div>
+  <div class="sb-section">Ana Menü</div>
+  <div class="sb-item active" onclick="nav('dashboard',this)">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="#fff" stroke-width="1.2"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="#fff" stroke-width="1.2"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="#fff" stroke-width="1.2"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="#fff" stroke-width="1.2"/></svg>
+    Dashboard
+  </div>
+  <div class="sb-item" onclick="nav('danismanlar',this)">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="6" r="3" stroke="#9FE1CB" stroke-width="1.2"/><path d="M2 14c0-3 2.7-5 6-5s6 2 6 5" stroke="#9FE1CB" stroke-width="1.2" stroke-linecap="round"/></svg>
+    Danışmanlar
+  </div>
+  <div class="sb-item" onclick="nav('portfoy',this)">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="#9FE1CB" stroke-width="1.2"/><path d="M5 7h6M5 9.5h4" stroke="#9FE1CB" stroke-width="1.2" stroke-linecap="round"/></svg>
+    Portföy
+  </div>
+  <div class="sb-item" onclick="nav('ai',this)">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="#9FE1CB" stroke-width="1.2"/><path d="M8 5v3l2 2" stroke="#9FE1CB" stroke-width="1.2" stroke-linecap="round"/></svg>
+    AI Koçluk
+  </div>
+  <div class="sb-section">Sistem</div>
+  <div class="sb-item" onclick="nav('ayarlar',this)">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="2.5" stroke="#9FE1CB" stroke-width="1.2"/><path d="M8 2v1.5M8 12.5V14M2 8h1.5M12.5 8H14" stroke="#9FE1CB" stroke-width="1.2" stroke-linecap="round"/></svg>
+    Ayarlar
+  </div>
+  <div class="sb-footer">
+    <div style="display:flex;align-items:center">
+      <div class="sb-avatar">AY</div>
+      <div><div class="sb-name">Ahmet Yılmaz</div><div class="sb-role">Ofis Sahibi</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <div><div class="topbar-title" id="page-title">Genel Bakış</div><div class="topbar-meta" id="page-meta">Temmuz 2025 · 18 danışman aktif</div></div>
+  </div>
+  <div class="content">
+
+    <div class="page active" id="page-dashboard">
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Aylık satış</div><div class="kpi-val">24</div><div class="kpi-sub up">↑ 3 geçen aya göre</div></div>
+        <div class="kpi"><div class="kpi-label">Toplam ciro</div><div class="kpi-val">₺4.2M</div><div class="kpi-sub up">↑ %12</div></div>
+        <div class="kpi"><div class="kpi-label">Aktif müşteri</div><div class="kpi-val">87</div><div class="kpi-sub down">↓ 5 bu ay</div></div>
+        <div class="kpi"><div class="kpi-label">Kapanış oranı</div><div class="kpi-val">%18</div><div class="kpi-sub up">Hedef %20</div></div>
+      </div>
+      <div class="two-col">
+        <div class="card">
+          <div class="card-head"><span class="card-title">Danışman performansı</span><button class="card-btn" onclick="nav('danismanlar',null)">Tümü →</button></div>
+          <table>
+            <thead><tr><th></th><th>Ad</th><th>Satış</th><th>Müşteri</th><th>Kapanış</th><th>Hedef</th><th>Durum</th></tr></thead>
+            <tbody>
+              <tr class="clickable" onclick="nav('danismanlar',null)"><td><div class="av av-g">AY</div></td><td>Ayşe Y.</td><td>5</td><td>12</td><td>%24</td><td><div class="bar-w"><div class="bar" style="width:92%;background:#1D9E75"></div></div></td><td><span class="badge b-ok">İyi</span></td></tr>
+              <tr class="clickable" onclick="nav('danismanlar',null)"><td><div class="av av-w">MK</div></td><td>Murat K.</td><td>3</td><td>9</td><td>%14</td><td><div class="bar-w"><div class="bar" style="width:60%;background:#BA7517"></div></div></td><td><span class="badge b-warn">Takip</span></td></tr>
+              <tr class="clickable" onclick="nav('danismanlar',null)"><td><div class="av av-d">ZD</div></td><td>Zeynep D.</td><td>1</td><td>5</td><td>%8</td><td><div class="bar-w"><div class="bar" style="width:28%;background:#E24B4A"></div></div></td><td><span class="badge b-danger">Kritik</span></td></tr>
+              <tr class="clickable" onclick="nav('danismanlar',null)"><td><div class="av av-i">HÇ</div></td><td>Hakan Ç.</td><td>4</td><td>11</td><td>%20</td><td><div class="bar-w"><div class="bar" style="width:80%;background:#378ADD"></div></div></td><td><span class="badge b-ok">İyi</span></td></tr>
+              <tr class="clickable" onclick="nav('danismanlar',null)"><td><div class="av av-s">SB</div></td><td>Selin B.</td><td>2</td><td>7</td><td>%16</td><td><div class="bar-w"><div class="bar" style="width:50%;background:#BA7517"></div></div></td><td><span class="badge b-warn">Takip</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="card">
+            <div class="card-head"><span class="card-title">Portföy durumu</span><button class="card-btn" onclick="nav('portfoy',null)">Detay →</button></div>
+            <div class="pf-row"><div><div class="pf-label">Toplam aktif ilan</div><div class="pf-val">142</div></div><span class="badge b-ok">Normal</span></div>
+            <div class="pf-row"><div><div class="pf-label">90+ gün satılmayan</div><div class="pf-val">31</div></div><span class="badge b-warn">Dikkat</span></div>
+            <div class="pf-row"><div><div class="pf-label">Fiyat güncelleme</div><div class="pf-val">18</div></div><span class="badge b-danger">Acil</span></div>
+          </div>
+          <div class="alert" onclick="nav('ai',null)">
+            <div><div class="alert-t">2 danışman kritik</div><div class="alert-s">AI koçluk önerisi hazır →</div></div>
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 12l4-4-4-4" stroke="#854F0B" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-danismanlar">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Tüm danışmanlar</span><button class="card-btn">+ Danışman ekle</button></div>
+        <table>
+          <thead><tr><th></th><th>Ad Soyad</th><th>Aylık satış</th><th>Müşteri</th><th>Kapanış</th><th>Hedef</th><th>Durum</th></tr></thead>
+          <tbody>
+            <tr class="clickable" onclick="nav('ai',null)"><td><div class="av av-g">AY</div></td><td>Ayşe Yılmaz</td><td>5</td><td>12</td><td>%24</td><td><div class="bar-w"><div class="bar" style="width:92%;background:#1D9E75"></div></div></td><td><span class="badge b-ok">İyi</span></td></tr>
+            <tr class="clickable" onclick="nav('ai',null)"><td><div class="av av-w">MK</div></td><td>Murat Kaya</td><td>3</td><td>9</td><td>%14</td><td><div class="bar-w"><div class="bar" style="width:60%;background:#BA7517"></div></div></td><td><span class="badge b-warn">Takip</span></td></tr>
+            <tr class="clickable" onclick="nav('ai',null)"><td><div class="av av-d">ZD</div></td><td>Zeynep Doğan</td><td>1</td><td>5</td><td>%8</td><td><div class="bar-w"><div class="bar" style="width:28%;background:#E24B4A"></div></div></td><td><span class="badge b-danger">Kritik</span></td></tr>
+            <tr class="clickable" onclick="nav('ai',null)"><td><div class="av av-i">HÇ</div></td><td>Hakan Çelik</td><td>4</td><td>11</td><td>%20</td><td><div class="bar-w"><div class="bar" style="width:80%;background:#378ADD"></div></div></td><td><span class="badge b-ok">İyi</span></td></tr>
+            <tr class="clickable" onclick="nav('ai',null)"><td><div class="av av-s">SB</div></td><td>Selin Bozkurt</td><td>2</td><td>7</td><td>%16</td><td><div class="bar-w"><div class="bar" style="width:50%;background:#BA7517"></div></div></td><td><span class="badge b-warn">Takip</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="page" id="page-portfoy">
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Toplam aktif ilan</div><div class="kpi-val">142</div><div class="kpi-sub up">↑ 8 bu ay</div></div>
+        <div class="kpi"><div class="kpi-label">90+ gün satılmayan</div><div class="kpi-val">31</div><div class="kpi-sub" style="color:#854F0B">%22 portföy</div></div>
+        <div class="kpi"><div class="kpi-label">Fiyat güncelleme</div><div class="kpi-val">18</div><div class="kpi-sub down">Acil</div></div>
+        <div class="kpi"><div class="kpi-label">KRB eksik</div><div class="kpi-val">24</div><div class="kpi-sub" style="color:#854F0B">%17 ilanda</div></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">İlanlar</span>
+          <div style="display:flex;gap:6px;align-items:center">
+            <select style="font-size:11px;padding:4px 8px;border:1px solid #ddd;border-radius:6px"><option>Tüm durumlar</option><option>Aktif</option><option>Pasif</option></select>
+            <div class="vt"><button class="vt-btn active" id="vt-grid" onclick="setView('grid')">Grid</button><button class="vt-btn" id="vt-list" onclick="setView('list')">Liste</button></div>
+          </div>
+        </div>
+        <div id="ilan-grid" class="ilan-grid">
+          <div class="ilan danger"><div class="ilan-img">Daire<span class="ilan-img-badge"><span class="badge b-danger">Fiyat güncelle</span></span></div><div class="ilan-body"><div class="ilan-title">Bornova 3+1 / 110m²</div><div class="ilan-price">₺3.2M</div><div class="ilan-meta">142 gündür listede</div><div class="ilan-foot"><span class="ilan-dan">Zeynep D.</span><span class="krb-pill">KRB eksik</span></div></div></div>
+          <div class="ilan warn"><div class="ilan-img">Daire<span class="ilan-img-badge"><span class="badge b-warn">İzlemede</span></span></div><div class="ilan-body"><div class="ilan-title">Karşıyaka 2+1 / 85m²</div><div class="ilan-price">₺2.1M</div><div class="ilan-meta">97 gündür listede</div><div class="ilan-foot"><span class="ilan-dan">Murat K.</span><span class="krb-pill">KRB eksik</span></div></div></div>
+          <div class="ilan"><div class="ilan-img">Daire<span class="ilan-img-badge"><span class="badge b-ok">Aktif</span></span></div><div class="ilan-body"><div class="ilan-title">Alsancak 1+1 / 55m²</div><div class="ilan-price">₺1.8M</div><div class="ilan-meta">23 gündür listede</div><div class="ilan-foot"><span class="ilan-dan">Zeynep D.</span><span class="krb-pill has">KRB ✓</span></div></div></div>
+          <div class="ilan warn"><div class="ilan-img">Villa<span class="ilan-img-badge"><span class="badge b-warn">İzlemede</span></span></div><div class="ilan-body"><div class="ilan-title">Çeşme Villa / 220m²</div><div class="ilan-price">₺12M</div><div class="ilan-meta">88 gündür listede</div><div class="ilan-foot"><span class="ilan-dan">Ayşe Y.</span><span class="krb-pill has">KRB ✓</span></div></div></div>
+          <div class="ilan"><div class="ilan-img">Daire<span class="ilan-img-badge"><span class="badge b-ok">Aktif</span></span></div><div class="ilan-body"><div class="ilan-title">Narlıdere 3+1 / 130m²</div><div class="ilan-price">₺4.1M</div><div class="ilan-meta">34 gündür listede</div><div class="ilan-foot"><span class="ilan-dan">Hakan Ç.</span><span class="krb-pill has">KRB ✓</span></div></div></div>
+          <div class="ilan danger"><div class="ilan-img">Daire<span class="ilan-img-badge"><span class="badge b-danger">Fiyat güncelle</span></span></div><div class="ilan-body"><div class="ilan-title">Konak 2+1 / 90m²</div><div class="ilan-price">₺2.6M</div><div class="ilan-meta">115 gündür listede</div><div class="ilan-foot"><span class="ilan-dan">Ayşe Y.</span><span class="krb-pill">KRB eksik</span></div></div></div>
+        </div>
+        <table id="ilan-table" style="display:none">
+          <thead><tr><th>İlan</th><th>Danışman</th><th>Fiyat</th><th>Gün</th><th>Durum</th><th>KRB</th></tr></thead>
+          <tbody>
+            <tr style="border-left:3px solid #E24B4A"><td style="font-weight:600;padding-left:8px">Bornova 3+1</td><td>Zeynep D.</td><td>₺3.2M</td><td>142</td><td><span class="badge b-danger">Fiyat güncelle</span></td><td><span class="badge b-warn">Eksik</span></td></tr>
+            <tr style="border-left:3px solid #EF9F27"><td style="font-weight:600;padding-left:8px">Karşıyaka 2+1</td><td>Murat K.</td><td>₺2.1M</td><td>97</td><td><span class="badge b-warn">İzlemede</span></td><td><span class="badge b-warn">Eksik</span></td></tr>
+            <tr><td style="font-weight:600">Alsancak 1+1</td><td>Zeynep D.</td><td>₺1.8M</td><td>23</td><td><span class="badge b-ok">Aktif</span></td><td><span class="badge b-ok">Yüklü</span></td></tr>
+            <tr><td style="font-weight:600">Çeşme Villa</td><td>Ayşe Y.</td><td>₺12M</td><td>88</td><td><span class="badge b-warn">İzlemede</span></td><td><span class="badge b-ok">Yüklü</span></td></tr>
+            <tr><td style="font-weight:600">Narlıdere 3+1</td><td>Hakan Ç.</td><td>₺4.1M</td><td>34</td><td><span class="badge b-ok">Aktif</span></td><td><span class="badge b-ok">Yüklü</span></td></tr>
+            <tr style="border-left:3px solid #E24B4A"><td style="font-weight:600;padding-left:8px">Konak 2+1</td><td>Ayşe Y.</td><td>₺2.6M</td><td>115</td><td><span class="badge b-danger">Fiyat güncelle</span></td><td><span class="badge b-warn">Eksik</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="page" id="page-ai">
+      <div class="ai-card">
+        <div class="ai-head">AI koçluk analizi — Zeynep Doğan (Kritik)</div>
+        <div class="ai-item"><div class="ai-dot"></div><div>Görüşme → kapanış oranı ofis ortalamasının çok altında (%8 vs %18). Müzakere eğitimi önceliklendirilmeli.</div></div>
+        <div class="ai-item"><div class="ai-dot"></div><div>2 müşteri 12+ gün temasız — kayıp riski yüksek. Hatırlatıcı kurulması önerilir.</div></div>
+        <div class="ai-item"><div class="ai-dot"></div><div>Bornova ilanı 142 gündür satılmıyor. Fiyat revizyonu önerilir.</div></div>
+        <div class="ai-item"><div class="ai-dot"></div><div>Dijital pazarlama eğitimi tamamlanmamış.</div></div>
+        <button class="ai-cta">Koçluk seansı başlat →</button>
+      </div>
+      <div class="ai-card" style="background:#f9f9f7;border-color:#eee">
+        <div class="ai-head" style="color:#888">AI koçluk analizi — Murat Kaya (Takip)</div>
+        <div class="ai-item" style="color:#888;border-color:#eee"><div class="ai-dot" style="background:#888"></div><div>Kapanış oranı düşük (%14). Dönüşüm teknikleri üzerine çalışılmalı.</div></div>
+        <div class="ai-item" style="color:#888;border-color:#eee"><div class="ai-dot" style="background:#888"></div><div>Karşıyaka ilanı 97 gündür satılmıyor. Fiyat analizi önerilir.</div></div>
+        <button class="ai-cta" style="border-color:#ddd;color:#888">Koçluk seansı başlat →</button>
+      </div>
+    </div>
+
+    <div class="page" id="page-ayarlar">
+      <div class="card" style="max-width:480px">
+        <div class="card-head"><span class="card-title">Ofis ayarları</span></div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div><label style="display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:6px">Ofis adı</label><input style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px" value="Yılmaz Gayrimenkul"></div>
+          <div><label style="display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:6px">Şehir</label><input style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px" value="İzmir"></div>
+          <div><label style="display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:6px">Aylık hedef (satış)</label><input style="width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px" value="30"></div>
+          <button style="padding:10px 20px;background:#0F6E56;color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;width:fit-content;font-weight:600">Kaydet</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const pages={dashboard:'Genel Bakış',danismanlar:'Danışmanlar',portfoy:'Portföy Yönetimi',ai:'AI Koçluk',ayarlar:'Ayarlar'};
+const metas={dashboard:'Temmuz 2025 · 18 danışman aktif',danismanlar:'18 danışman kayıtlı',portfoy:'142 aktif ilan',ai:'2 danışman için öneri hazır',ayarlar:'Ofis yapılandırması'};
+function nav(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  if(el)el.classList.add('active');
+  else{const m={dashboard:0,danismanlar:1,portfoy:2,ai:3,ayarlar:4};const items=document.querySelectorAll('.sb-item');if(m[id]!==undefined)items[m[id]].classList.add('active');}
+  document.getElementById('page-title').textContent=pages[id]||id;
+  document.getElementById('page-meta').textContent=metas[id]||'';
+}
+function setView(v){
+  document.getElementById('ilan-grid').style.display=v==='grid'?'grid':'none';
+  document.getElementById('ilan-table').style.display=v==='list'?'table':'none';
+  document.getElementById('vt-grid').classList.toggle('active',v==='grid');
+  document.getElementById('vt-list').classList.toggle('active',v==='list');
+}
+</script>
+</body>
+</html>

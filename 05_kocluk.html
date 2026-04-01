@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PropCoach — Koçluk Seansı</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+.topbar{background:#0F6E56;padding:.875rem 1.25rem;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.back-btn{font-size:12px;color:#9FE1CB;cursor:pointer;padding:4px 10px;border:1px solid rgba(255,255,255,0.2);border-radius:8px;background:transparent;text-decoration:none}
+.back-btn:hover{background:rgba(255,255,255,0.1)}
+.tb-name{font-size:14px;font-weight:600;color:#fff}
+.tb-sub{font-size:11px;color:#9FE1CB;margin-top:1px}
+.badge-k{font-size:10px;padding:2px 8px;border-radius:20px;background:rgba(226,75,74,0.3);color:#F09595;font-weight:600;margin-left:6px}
+
+.profile-bar{background:#f9f9f7;border-bottom:1px solid #eee;padding:.875rem 1.25rem;display:flex;gap:2rem;flex-shrink:0;flex-wrap:wrap}
+.pstat{text-align:center}
+.pstat-val{font-size:16px;font-weight:600}
+.pstat-label{font-size:10px;color:#888;margin-top:2px}
+.red{color:#A32D2D}.warn{color:#854F0B}
+.pdivider{width:1px;background:#eee;flex-shrink:0}
+
+.mode-bar{background:#FAEEDA;border-bottom:1px solid #FAC775;padding:8px 1.25rem;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.mode-text{font-size:11px;color:#854F0B}
+.mode-btn{font-size:11px;padding:4px 12px;border:1px solid #FAC775;border-radius:8px;background:transparent;color:#854F0B;cursor:pointer;font-weight:600}
+.mode-btn:hover{background:rgba(0,0,0,0.05)}
+
+.messages{flex:1;overflow-y:auto;padding:1.25rem;display:flex;flex-direction:column;gap:12px;background:#fff}
+.msg{max-width:80%;display:flex;flex-direction:column;gap:4px}
+.msg.ai{align-self:flex-start}
+.msg.user{align-self:flex-end}
+.msg-row{display:flex;align-items:flex-end;gap:8px}
+.msg.user .msg-row{flex-direction:row-reverse}
+.bubble{padding:11px 15px;border-radius:12px;font-size:13px;line-height:1.7}
+.msg.ai .bubble{background:#f1f0e8;color:#1a1a1a;border-bottom-left-radius:4px}
+.msg.user .bubble{background:#0F6E56;color:#fff;border-bottom-right-radius:4px}
+.msg-time{font-size:10px;color:#bbb}
+.msg.user .msg-time{text-align:right}
+.av{width:30px;height:30px;border-radius:50%;background:#0F6E56;color:#fff;font-size:10px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.typing{display:flex;gap:4px;padding:12px 15px;background:#f1f0e8;border-radius:12px;border-bottom-left-radius:4px;width:fit-content}
+.typing span{width:6px;height:6px;border-radius:50%;background:#aaa;animation:blink 1.2s infinite}
+.typing span:nth-child(2){animation-delay:.2s}
+.typing span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
+
+.suggestions{padding:.75rem 1.25rem;border-top:1px solid #eee;display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0;background:#fff}
+.sug{font-size:11px;padding:6px 12px;border:1px solid #ddd;border-radius:20px;cursor:pointer;background:#fff;color:#666;white-space:nowrap}
+.sug:hover{border-color:#0F6E56;color:#0F6E56;background:#E1F5EE}
+
+.input-row{padding:.875rem 1.25rem;border-top:1px solid #eee;display:flex;gap:8px;flex-shrink:0;background:#fff}
+.inp{flex:1;padding:10px 14px;border:1px solid #ddd;border-radius:12px;font-size:13px;font-family:inherit}
+.inp:focus{outline:none;border-color:#0F6E56}
+.send{width:40px;height:40px;border-radius:12px;background:#0F6E56;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.send:hover{background:#085041}
+.send:active{transform:scale(0.95)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="back-btn" href="04_dashboard.html">← Dashboard</a>
+  <div>
+    <div class="tb-name">Zeynep Doğan <span class="badge-k">Kritik</span></div>
+    <div class="tb-sub">AI Koçluk Seansı · Simülasyon modu</div>
+  </div>
+</div>
+
+<div class="profile-bar">
+  <div class="pstat"><div class="pstat-val red">1</div><div class="pstat-label">Aylık satış</div></div>
+  <div class="pdivider"></div>
+  <div class="pstat"><div class="pstat-val">5</div><div class="pstat-label">Aktif müşteri</div></div>
+  <div class="pdivider"></div>
+  <div class="pstat"><div class="pstat-val red">%8</div><div class="pstat-label">Kapanış oranı</div></div>
+  <div class="pdivider"></div>
+  <div class="pstat"><div class="pstat-val warn">%28</div><div class="pstat-label">Hedefe ulaşma</div></div>
+  <div class="pdivider"></div>
+  <div class="pstat"><div class="pstat-val warn">142 gün</div><div class="pstat-label">En uzun ilan</div></div>
+  <div class="pdivider"></div>
+  <div class="pstat"><div class="pstat-val red">2</div><div class="pstat-label">Kayıp risk müşteri</div></div>
+</div>
+
+<div class="mode-bar">
+  <span class="mode-text">Simülasyon modu — cevaplar sabit senaryolara dayanır</span>
+  <button class="mode-btn" onclick="window.location='06_kocluk_ai.html'">Gerçek AI'a geç →</button>
+</div>
+
+<div class="messages" id="messages">
+  <div class="msg ai">
+    <div class="msg-row">
+      <div class="av">AI</div>
+      <div class="bubble">Merhaba. Ben PropCoach AI koçunuz. Zeynep Hanım'ın bu ayki performans verilerini inceledim.<br><br>Görüşme → kapanış oranınız %8 — ofis ortalaması %18. Bu farkı birlikte ele alalım. Müşteri görüşmelerinde en çok zorlandığınız an hangisi?</div>
+    </div>
+    <div class="msg-time">14:32</div>
+  </div>
+</div>
+
+<div class="suggestions" id="sugg">
+  <button class="sug" onclick="send('Fiyat müzakeresinde zorlanıyorum')">Fiyat müzakeresinde zorlanıyorum</button>
+  <button class="sug" onclick="send('Müşteri takibini nasıl yapmalıyım?')">Müşteri takibini nasıl yapmalıyım?</button>
+  <button class="sug" onclick="send('Bornova ilanım neden satılmıyor?')">Bornova ilanım neden satılmıyor?</button>
+  <button class="sug" onclick="send('Hedefime nasıl ulaşırım?')">Hedefime nasıl ulaşırım?</button>
+</div>
+
+<div class="input-row">
+  <input class="inp" id="inp" placeholder="Mesajınızı yazın..." onkeydown="if(event.key==='Enter')send()">
+  <button class="send" onclick="send()">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8l12-6-5 6 5 6-12-6z" fill="#fff"/></svg>
+  </button>
+</div>
+
+<script>
+const R={
+  fiyat:[
+    'Fiyat müzakeresi en kritik becerilerden biri. Verilerinize baktığımda görüşme sayınız iyi ama kapanış düşük — bu genellikle fiyat konuşmasında güven eksikliğinden kaynaklanır.\n\nŞunu deneyin: Müşteri "pahalı" dediğinde hemen indirime gitmeyin. Önce şunu sorun: "Peki siz bu mülk için ideal fiyatı nasıl belirlediniz?" Bu soruyu soran danışmanların kapanış oranı ortalama %23 daha yüksek.',
+    'Fiyat itirazlarında etkili bir teknik: "Evet, anlıyorum" ile başlayın, ardından değeri yeniden çerçeveleyin. KRB dosyanız varsa bunu gösterin — fiyatın neden o noktada olduğunu somut verilerle açıklayın.'
+  ],
+  takip:[
+    'Müşteri takibinde 48 saat kuralı: Görüşmeden sonra 48 saat içinde mutlaka bir mesaj veya arama yapın.\n\nVerilerinize bakıyorum — Emre Ş. ve Kemal B. ile 12+ gündür temas yok. Bu ikisi kayıp riski. Hemen bugün şu mesajı gönderin: "Merhaba, geçen hafta görüştüğümüz mülk hakkında yeni bir gelişme var, aktarmak istedim."',
+    'Müşteri soğuduğunda doğrudan aramak yerine değer katan bir şeyle dönün: benzer fiyatlı yeni bir ilan, bölge fiyat raporu veya "sizin kriterlerinize uyan bir mülk geldi" mesajı.'
+  ],
+  bornova:[
+    '142 gün uzun bir süre. Bornova ilanınız için üç olası neden:\n\n1. Fiyat — bölge piyasasının üzerinde olabilir\n2. Fotoğraflar — günün en iyi ışığında 8-10 fotoğraf olmalı\n3. Başlık — "3+1 daire" yerine özellik odaklı başlık deneyin\n\nAyrıca KRB dosyanız eksik — bu alıcıya güven vermiyor. Hangi konudan başlamak istersiniz?',
+    'Fiyat revizyonu yapmadan önce şunu kontrol edin: Aynı bölgede son 3 ayda kaçı satıldı ve kaça? Bu verilere sahipseniz paylaşın, birlikte analiz edelim.'
+  ],
+  hedef:[
+    'Bu ay hedefiniz 4 satış, gerçekleşen 1. Kalan için 2 hafta var.\n\nAktif müşterilerinizden Ahmet Y. ve Neslihan A. görüşmede — bu ikisini önceliklendirin. Emre Ş. ve Kemal B. ile bu hafta mutlaka iletişim kurun.\n\nGünlük 2 müşteri teması + haftada 1 yeni ilan görüntüleme hedefi koyun.',
+    'Hedefe ulaşmak için en önemli şey: mevcut sıcak müşterilere odaklanmak. Ahmet Y. ile süreci hızlandırın — karar aşamasında ne engelliyor?'
+  ],
+  default:[
+    'Anlıyorum. Gayrimenkul danışmanlığında en kritik beceri, müşterinin gerçek ihtiyacını dinlemek ve buna göre çözüm sunmaktır. Biraz daha açar mısınız?',
+    'İyi bir soru. Verilerinize bakarak şunu söyleyebilirim: Güçlü yönleriniz var — aktif müşteri sayınız iyi. Şimdi bu müşterileri satışa dönüştürmeye odaklanma zamanı.',
+    'Bu konuda birlikte çalışabiliriz. Önce şunu netleştirelim: Bu durumda en büyük engel sizce ne?'
+  ]
+};
+
+const pick = a => a[Math.floor(Math.random()*a.length)];
+const t = () => { const d=new Date(); return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0'); };
+let typing = null;
+
+function getResp(m){
+  m = m.toLowerCase();
+  if(m.includes('fiyat')||m.includes('müzakere')) return pick(R.fiyat);
+  if(m.includes('takip')||m.includes('müşteri')||m.includes('iletişim')) return pick(R.takip);
+  if(m.includes('bornova')||m.includes('ilan')||m.includes('satılmıyor')) return pick(R.bornova);
+  if(m.includes('hedef')||m.includes('ulaş')||m.includes('nasıl')) return pick(R.hedef);
+  return pick(R.default);
+}
+
+function addMsg(text, role){
+  const msgs = document.getElementById('messages');
+  const d = document.createElement('div');
+  d.className = 'msg '+role;
+  if(role==='ai'){
+    d.innerHTML = `<div class="msg-row"><div class="av">AI</div><div class="bubble">${text.replace(/\n/g,'<br>')}</div></div><div class="msg-time">${t()}</div>`;
+  } else {
+    d.innerHTML = `<div class="msg-row"><div class="bubble">${text}</div></div><div class="msg-time">${t()}</div>`;
+  }
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping(){
+  const msgs = document.getElementById('messages');
+  typing = document.createElement('div');
+  typing.className = 'msg ai';
+  typing.innerHTML = `<div class="msg-row"><div class="av">AI</div><div class="typing"><span></span><span></span><span></span></div></div>`;
+  msgs.appendChild(typing);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function send(text){
+  const inp = document.getElementById('inp');
+  const msg = text || inp.value.trim();
+  if(!msg) return;
+  inp.value = '';
+  document.getElementById('sugg').style.display = 'none';
+  addMsg(msg, 'user');
+  showTyping();
+  setTimeout(()=>{
+    if(typing){ typing.remove(); typing=null; }
+    addMsg(getResp(msg), 'ai');
+  }, 800 + Math.random()*700);
+}
+</script>
+</body>
+</html>

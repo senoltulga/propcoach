@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PropCoach — Landing</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a;background:#fff}
+a{text-decoration:none;cursor:pointer}
+
+.nav{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;border-bottom:1px solid #eee}
+.nav-logo{font-size:16px;font-weight:600;color:#0F6E56}
+.nav-links{display:flex;gap:1.5rem;align-items:center}
+.nav-link{font-size:13px;color:#666}
+.nav-link:hover{color:#1a1a1a}
+.nav-btn{font-size:13px;padding:7px 16px;border:1px solid #ddd;border-radius:8px;cursor:pointer;background:#fff;color:#1a1a1a}
+.nav-btn:hover{background:#f5f5f5}
+.nav-btn.primary{background:#0F6E56;color:#fff;border-color:#0F6E56}
+.nav-btn.primary:hover{background:#085041}
+
+.hero{padding:5rem 2rem 4rem;text-align:center;max-width:700px;margin:0 auto}
+.hero-badge{display:inline-block;font-size:11px;padding:4px 14px;border-radius:20px;background:#E1F5EE;color:#0F6E56;font-weight:600;margin-bottom:1.5rem}
+.hero h1{font-size:38px;font-weight:600;line-height:1.2;margin-bottom:1.25rem;color:#1a1a1a}
+.hero h1 span{color:#0F6E56}
+.hero-sub{font-size:16px;color:#555;line-height:1.75;margin-bottom:2.5rem;max-width:520px;margin-left:auto;margin-right:auto}
+.hero-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:3rem}
+.btn-primary{font-size:14px;padding:12px 28px;background:#0F6E56;color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:500}
+.btn-primary:hover{background:#085041}
+.btn-secondary{font-size:14px;padding:12px 28px;background:#fff;color:#1a1a1a;border:1px solid #ddd;border-radius:8px;cursor:pointer}
+.btn-secondary:hover{background:#f5f5f5}
+.hero-stats{display:flex;justify-content:center;gap:3rem;flex-wrap:wrap}
+.hero-stat-val{font-size:22px;font-weight:600;color:#1a1a1a;display:block;margin-bottom:3px}
+.hero-stat-label{font-size:12px;color:#888}
+
+hr{border:none;border-top:1px solid #eee}
+
+.section{padding:4rem 2rem;max-width:900px;margin:0 auto}
+.section-label{font-size:11px;font-weight:600;color:#0F6E56;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:0.5rem;text-align:center}
+.section-title{font-size:26px;font-weight:600;text-align:center;margin-bottom:0.75rem}
+.section-sub{font-size:15px;color:#666;text-align:center;margin-bottom:2.5rem;line-height:1.7}
+
+.feat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+@media(max-width:600px){.feat-grid{grid-template-columns:1fr}}
+.feat-card{background:#fff;border:1px solid #eee;border-radius:12px;padding:1.5rem}
+.feat-icon{width:36px;height:36px;border-radius:8px;background:#E1F5EE;display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.feat-title{font-size:14px;font-weight:600;margin-bottom:8px}
+.feat-desc{font-size:13px;color:#666;line-height:1.65}
+
+.target-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;max-width:700px;margin:0 auto}
+@media(max-width:600px){.target-grid{grid-template-columns:1fr}}
+.target-card{border-radius:12px;padding:1.75rem;cursor:pointer;transition:opacity .15s}
+.target-card:hover{opacity:.9}
+.target-card.office{background:#E1F5EE;border:1px solid #9FE1CB}
+.target-card.agent{background:#EEEDFE;border:1px solid #CECBF6}
+.target-tag{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600;display:inline-block;margin-bottom:12px}
+.target-card.office .target-tag{background:#9FE1CB;color:#085041}
+.target-card.agent .target-tag{background:#CECBF6;color:#3C3489}
+.target-title{font-size:15px;font-weight:600;margin-bottom:10px}
+.target-card.office .target-title{color:#085041}
+.target-card.agent .target-title{color:#3C3489}
+.target-list{font-size:13px;line-height:2}
+.target-card.office .target-list{color:#0F6E56}
+.target-card.agent .target-list{color:#534AB7}
+
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:820px;margin:0 auto}
+@media(max-width:700px){.price-grid{grid-template-columns:1fr}}
+.price-card{background:#fff;border:1px solid #eee;border-radius:12px;padding:1.5rem}
+.price-card.featured{border:2px solid #0F6E56}
+.price-badge{font-size:11px;padding:3px 12px;border-radius:20px;background:#0F6E56;color:#fff;font-weight:600;display:inline-block;margin-bottom:12px}
+.price-name{font-size:14px;font-weight:600;margin-bottom:6px}
+.price-val{font-size:30px;font-weight:600;margin-bottom:2px}
+.price-period{font-size:12px;color:#888;margin-bottom:16px}
+.price-features{font-size:13px;color:#555;line-height:2;border-top:1px solid #eee;padding-top:14px;margin-bottom:16px}
+.price-check{color:#0F6E56;margin-right:6px}
+.price-btn{width:100%;padding:10px;font-size:13px;border-radius:8px;cursor:pointer;border:1px solid #ddd;background:#f5f5f5;color:#1a1a1a;font-weight:500}
+.price-btn:hover{background:#eee}
+.price-card.featured .price-btn{background:#0F6E56;color:#fff;border-color:#0F6E56}
+.price-card.featured .price-btn:hover{background:#085041}
+
+.cta-section{padding:4rem 2rem;text-align:center;background:#f9f9f7;border-top:1px solid #eee;border-bottom:1px solid #eee}
+.cta-title{font-size:26px;font-weight:600;margin-bottom:0.75rem}
+.cta-sub{font-size:15px;color:#666;margin-bottom:2rem}
+
+footer{padding:1.5rem 2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.footer-copy{font-size:12px;color:#aaa}
+.footer-links{display:flex;gap:1.5rem}
+.footer-link{font-size:12px;color:#aaa}
+.footer-link:hover{color:#666}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">PropCoach</div>
+  <div class="nav-links">
+    <a class="nav-link" href="#ozellikler">Özellikler</a>
+    <a class="nav-link" href="#fiyatlar">Fiyatlar</a>
+    <button class="nav-btn" onclick="window.location='02_giris.html'">Giriş yap</button>
+    <button class="nav-btn primary" onclick="window.location='02_giris.html'">Ücretsiz başla</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge">Gayrimenkul ofisleri için AI koçluk</div>
+  <h1>Danışmanlarınız gelişsin,<br><span>ofisiniz büyüsün</span></h1>
+  <p class="hero-sub">PropCoach, gayrimenkul ofisleri ve danışmanlar için AI destekli performans takibi ve kişiselleştirilmiş koçluk platformudur.</p>
+  <div class="hero-btns">
+    <button class="btn-primary" onclick="window.location='02_giris.html'">14 gün ücretsiz dene</button>
+    <button class="btn-secondary">Demo izle</button>
+  </div>
+  <div class="hero-stats">
+    <div><span class="hero-stat-val">2.400+</span><span class="hero-stat-label">danışman kullanıyor</span></div>
+    <div><span class="hero-stat-val">%34</span><span class="hero-stat-label">ortalama kapanış artışı</span></div>
+    <div><span class="hero-stat-val">180+</span><span class="hero-stat-label">aktif ofis</span></div>
+  </div>
+</section>
+
+<hr id="ozellikler">
+
+<div class="section">
+  <div class="section-label">Özellikler</div>
+  <div class="section-title">Her şey tek platformda</div>
+  <p class="section-sub">Danışman takibinden AI koçluğa, portföy yönetiminden eğitime kadar.</p>
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><rect x="2" y="8" width="3" height="6" rx="1" fill="#0F6E56"/><rect x="6.5" y="5" width="3" height="9" rx="1" fill="#0F6E56"/><rect x="11" y="2" width="3" height="12" rx="1" fill="#0F6E56"/></svg>
+      </div>
+      <div class="feat-title">Performans takibi</div>
+      <div class="feat-desc">Danışmanlarınızın satış, müşteri ve kapanış oranlarını gerçek zamanlı izleyin. Renk kodlu durum rozetleriyle anlık görünüm.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="#0F6E56" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="#0F6E56" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="feat-title">AI koçluk motoru</div>
+      <div class="feat-desc">Zayıf alanları otomatik tespit eder, her danışmana özel gelişim önerisi üretir. Ofisinizin dokümanlarını okuyarak kişiselleştirir.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><rect x="2" y="3" width="12" height="10" rx="2" stroke="#0F6E56" stroke-width="1.5"/><path d="M5 7h6M5 9.5h4" stroke="#0F6E56" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </div>
+      <div class="feat-title">Portföy yönetimi</div>
+      <div class="feat-desc">Tüm ilanlarınızı tek ekranda görün. 90+ gün takibi, fiyat güncelleme önerisi ve KRB dosyası durumu dahil.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">
+        <svg width="18" height="18" viewBox="0 0 16 16" fill="none"><path d="M3 12L8 4l5 8H3z" stroke="#0F6E56" stroke-width="1.5" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="feat-title">Eğitim ve gelişim</div>
+      <div class="feat-desc">Modül bazlı eğitim içerikleri, ilerleme takibi ve AI önerili kişisel öğrenme yolları.</div>
+    </div>
+  </div>
+</div>
+
+<hr>
+
+<div class="section">
+  <div class="section-label">Kime göre?</div>
+  <div class="section-title">Ofisiniz için mi, siz için mi?</div>
+  <p class="section-sub">İki farklı kullanıcı tipi, iki farklı deneyim.</p>
+  <div class="target-grid">
+    <div class="target-card office" onclick="window.location='02_giris.html'">
+      <div class="target-tag">Kurumsal</div>
+      <div class="target-title">Gayrimenkul ofisleri</div>
+      <div class="target-list">
+        Tüm danışmanları izle<br>
+        KPI ve portföy takibi<br>
+        AI koçluk otomasyonu<br>
+        Rol bazlı erişim
+      </div>
+    </div>
+    <div class="target-card agent" onclick="window.location='02_giris.html'">
+      <div class="target-tag">Bireysel</div>
+      <div class="target-title">Gayrimenkul danışmanları</div>
+      <div class="target-list">
+        Kişisel performans takibi<br>
+        Müşteri yönetimi<br>
+        AI koçluk seansları<br>
+        Bağımsız kullanım
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr id="fiyatlar">
+
+<div class="section">
+  <div class="section-label">Fiyatlar</div>
+  <div class="section-title">Şeffaf fiyatlandırma</div>
+  <p class="section-sub">14 gün ücretsiz, kredi kartı gerekmez.</p>
+  <div class="price-grid">
+    <div class="price-card">
+      <div class="price-name">Danışman</div>
+      <div class="price-val">₺499</div>
+      <div class="price-period">/ ay · kişi başı</div>
+      <div class="price-features">
+        <span class="price-check">✓</span>Kişisel dashboard<br>
+        <span class="price-check">✓</span>Müşteri takibi<br>
+        <span class="price-check">✓</span>AI koçluk (5 seans/ay)<br>
+        <span class="price-check">✓</span>Kişisel portföy
+      </div>
+      <button class="price-btn" onclick="window.location='02_giris.html'">Başla</button>
+    </div>
+    <div class="price-card featured">
+      <div class="price-badge">En popüler</div>
+      <div class="price-name">Ofis</div>
+      <div class="price-val">₺2.499</div>
+      <div class="price-period">/ ay · 10 danışmana kadar</div>
+      <div class="price-features">
+        <span class="price-check">✓</span>Tüm danışman özellikleri<br>
+        <span class="price-check">✓</span>Ofis dashboard'u<br>
+        <span class="price-check">✓</span>Sınırsız AI koçluk<br>
+        <span class="price-check">✓</span>Portföy yönetimi<br>
+        <span class="price-check">✓</span>KRB takibi
+      </div>
+      <button class="price-btn" onclick="window.location='02_giris.html'">14 gün ücretsiz dene</button>
+    </div>
+    <div class="price-card">
+      <div class="price-name">Kurumsal</div>
+      <div class="price-val">₺5.999</div>
+      <div class="price-period">/ ay · sınırsız danışman</div>
+      <div class="price-features">
+        <span class="price-check">✓</span>Tüm Ofis özellikleri<br>
+        <span class="price-check">✓</span>Sınırsız danışman<br>
+        <span class="price-check">✓</span>Özel doküman yükleme<br>
+        <span class="price-check">✓</span>Öncelikli destek<br>
+        <span class="price-check">✓</span>API erişimi
+      </div>
+      <button class="price-btn">Teklif al</button>
+    </div>
+  </div>
+</div>
+
+<div class="cta-section">
+  <div class="cta-title">Bugün başlayın</div>
+  <p class="cta-sub">14 gün ücretsiz, kurulum yok, kredi kartı gerekmez.</p>
+  <button class="btn-primary" onclick="window.location='02_giris.html'">Ücretsiz hesap oluştur</button>
+</div>
+
+<footer>
+  <div class="footer-copy">© 2025 PropCoach · Tüm hakları saklıdır</div>
+  <div class="footer-links">
+    <a class="footer-link">Gizlilik</a>
+    <a class="footer-link">KVKK</a>
+    <a class="footer-link">İletişim</a>
+  </div>
+</footer>
+
+</body>
+</html>

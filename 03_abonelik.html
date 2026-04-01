@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PropCoach — Abonelik</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#1a1a1a;background:#f9f9f7;min-height:100vh}
+.nav{display:flex;justify-content:space-between;align-items:center;padding:1rem 2rem;background:#fff;border-bottom:1px solid #eee}
+.nav-logo{font-size:15px;font-weight:600;color:#0F6E56;cursor:pointer}
+.nav-back{font-size:13px;color:#666;cursor:pointer;text-decoration:none}
+.nav-back:hover{color:#1a1a1a}
+.hero{text-align:center;padding:3rem 2rem 2rem}
+.hero h1{font-size:28px;font-weight:600;margin-bottom:.75rem}
+.hero p{font-size:15px;color:#666;margin-bottom:1.5rem}
+.toggle-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:2.5rem}
+.toggle-label{font-size:13px;color:#888}
+.toggle-label.active{color:#1a1a1a;font-weight:600}
+.toggle{width:44px;height:24px;background:#ddd;border-radius:12px;cursor:pointer;position:relative;transition:background .2s}
+.toggle.on{background:#0F6E56}
+.toggle-thumb{width:18px;height:18px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:transform .2s}
+.toggle.on .toggle-thumb{transform:translateX(20px)}
+.save-badge{font-size:11px;padding:2px 8px;border-radius:20px;background:#E1F5EE;color:#0F6E56;font-weight:600}
+
+.plans{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:860px;margin:0 auto 2rem;padding:0 2rem}
+@media(max-width:700px){.plans{grid-template-columns:1fr}}
+.plan{background:#fff;border:1px solid #eee;border-radius:16px;padding:1.75rem;position:relative;transition:border-color .15s}
+.plan.featured{border:2px solid #0F6E56}
+.plan.selected{border:2px solid #534AB7}
+.popular-badge{font-size:11px;padding:3px 12px;border-radius:20px;background:#0F6E56;color:#fff;font-weight:600;display:inline-block;margin-bottom:12px}
+.plan-name{font-size:15px;font-weight:600;margin-bottom:6px}
+.plan-desc{font-size:12px;color:#888;margin-bottom:1.25rem;line-height:1.6}
+.plan-price{font-size:32px;font-weight:600;margin-bottom:2px}
+.plan-period{font-size:12px;color:#888;margin-bottom:1.5rem}
+.plan-original{font-size:13px;color:#aaa;text-decoration:line-through;margin-left:6px}
+.features{font-size:13px;color:#555;line-height:2;border-top:1px solid #eee;padding-top:1.25rem;margin-bottom:1.5rem}
+.check{color:#0F6E56;margin-right:6px}
+.plan-btn{width:100%;padding:11px;font-size:13px;border-radius:8px;cursor:pointer;border:1px solid #ddd;background:#f5f5f5;color:#1a1a1a;font-weight:600;transition:all .15s}
+.plan-btn:hover{background:#eee}
+.plan.featured .plan-btn{background:#0F6E56;color:#fff;border-color:#0F6E56}
+.plan.featured .plan-btn:hover{background:#085041}
+.plan.selected .plan-btn{background:#534AB7;color:#fff;border-color:#534AB7}
+.plan.selected .plan-btn:hover{background:#3C3489}
+
+.checkout{max-width:500px;margin:0 auto 3rem;padding:0 2rem}
+.checkout-card{background:#fff;border:1px solid #eee;border-radius:16px;padding:1.75rem;display:none}
+.checkout-card.show{display:block}
+.checkout-title{font-size:16px;font-weight:600;margin-bottom:1.25rem}
+.summary-row{display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid #f5f5f5}
+.summary-row:last-child{border-bottom:none;font-weight:600;font-size:14px;padding-top:12px}
+.field{margin-bottom:1rem}
+.field label{display:block;font-size:12px;font-weight:600;color:#555;margin-bottom:6px}
+.field input{width:100%;padding:11px 14px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit}
+.field input:focus{outline:none;border-color:#0F6E56}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.secure-note{font-size:11px;color:#aaa;text-align:center;margin-top:10px;display:flex;align-items:center;justify-content:center;gap:4px}
+.pay-btn{width:100%;padding:13px;font-size:14px;font-weight:600;background:#0F6E56;color:#fff;border:none;border-radius:8px;cursor:pointer;margin-top:1rem}
+.pay-btn:hover{background:#085041}
+.success-state{text-align:center;padding:2rem;display:none}
+.success-state.show{display:block}
+.success-icon{width:56px;height:56px;border-radius:50%;background:#EAF3DE;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem}
+.success-title{font-size:18px;font-weight:600;margin-bottom:.5rem}
+.success-sub{font-size:13px;color:#888;margin-bottom:1.5rem}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo" onclick="window.location='01_landing.html'">PropCoach</div>
+  <a class="nav-back" href="01_landing.html">← Ana sayfaya dön</a>
+</nav>
+
+<div class="hero">
+  <h1>Planınızı seçin</h1>
+  <p>14 gün ücretsiz deneyin — kredi kartı gerekmez.</p>
+  <div class="toggle-row">
+    <span class="toggle-label active" id="label-monthly">Aylık</span>
+    <div class="toggle" id="billing-toggle" onclick="toggleBilling()">
+      <div class="toggle-thumb"></div>
+    </div>
+    <span class="toggle-label" id="label-yearly">Yıllık <span class="save-badge">%20 indirim</span></span>
+  </div>
+</div>
+
+<div class="plans">
+  <div class="plan" id="plan-danishman">
+    <div class="plan-name">Danışman</div>
+    <div class="plan-desc">Bağımsız çalışan gayrimenkul danışmanları için</div>
+    <div class="plan-price" id="price-danishman">₺499 <span class="plan-original" id="orig-danishman" style="display:none">₺624</span></div>
+    <div class="plan-period">/ ay · kişi başı</div>
+    <div class="features">
+      <span class="check">✓</span>Kişisel dashboard<br>
+      <span class="check">✓</span>Müşteri takibi<br>
+      <span class="check">✓</span>AI koçluk (5 seans/ay)<br>
+      <span class="check">✓</span>Kişisel portföy yönetimi<br>
+      <span class="check">✓</span>Eğitim modülleri
+    </div>
+    <button class="plan-btn" onclick="selectPlan('danishman','Danışman','499')">14 gün ücretsiz dene</button>
+  </div>
+
+  <div class="plan featured" id="plan-ofis">
+    <div class="popular-badge">En popüler</div>
+    <div class="plan-name">Ofis</div>
+    <div class="plan-desc">10 danışmana kadar gayrimenkul ofisleri için</div>
+    <div class="plan-price" id="price-ofis">₺2.499 <span class="plan-original" id="orig-ofis" style="display:none">₺3.124</span></div>
+    <div class="plan-period">/ ay · 10 danışmana kadar</div>
+    <div class="features">
+      <span class="check">✓</span>Tüm Danışman özellikleri<br>
+      <span class="check">✓</span>Ofis sahibi dashboard'u<br>
+      <span class="check">✓</span>Sınırsız AI koçluk<br>
+      <span class="check">✓</span>Portföy yönetimi<br>
+      <span class="check">✓</span>KRB dosyası takibi<br>
+      <span class="check">✓</span>Doküman yükleme (RAG)
+    </div>
+    <button class="plan-btn" onclick="selectPlan('ofis','Ofis','2499')">14 gün ücretsiz dene</button>
+  </div>
+
+  <div class="plan" id="plan-kurumsal">
+    <div class="plan-name">Kurumsal</div>
+    <div class="plan-desc">Sınırsız danışmanlı büyük ofisler ve franchise</div>
+    <div class="plan-price" id="price-kurumsal">₺5.999 <span class="plan-original" id="orig-kurumsal" style="display:none">₺7.499</span></div>
+    <div class="plan-period">/ ay · sınırsız danışman</div>
+    <div class="features">
+      <span class="check">✓</span>Tüm Ofis özellikleri<br>
+      <span class="check">✓</span>Sınırsız danışman<br>
+      <span class="check">✓</span>Özel AI eğitimi<br>
+      <span class="check">✓</span>Öncelikli destek<br>
+      <span class="check">✓</span>API erişimi<br>
+      <span class="check">✓</span>Çoklu ofis yönetimi
+    </div>
+    <button class="plan-btn" onclick="selectPlan('kurumsal','Kurumsal','5999')">Teklif al</button>
+  </div>
+</div>
+
+<div class="checkout">
+  <div class="checkout-card" id="checkout-card">
+    <div class="checkout-title">Ödeme bilgileri</div>
+    <div id="summary" style="background:#f9f9f7;border-radius:8px;padding:12px 14px;margin-bottom:1.25rem;font-size:13px"></div>
+    <div class="field"><label>Ad soyad</label><input type="text" placeholder="Kart üzerindeki isim"></div>
+    <div class="field"><label>Kart numarası</label><input type="text" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCard(this)"></div>
+    <div class="field-row">
+      <div class="field"><label>Son kullanma</label><input type="text" placeholder="AA/YY" maxlength="5"></div>
+      <div class="field"><label>CVV</label><input type="text" placeholder="123" maxlength="3"></div>
+    </div>
+    <div class="secure-note">
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="7" rx="1.5" stroke="#aaa" stroke-width="1.2"/><path d="M5 7V5a3 3 0 016 0v2" stroke="#aaa" stroke-width="1.2" stroke-linecap="round"/></svg>
+      256-bit SSL şifreleme ile güvenli ödeme
+    </div>
+    <button class="pay-btn" id="pay-btn" onclick="doPay()">Ücretsiz denemeyi başlat →</button>
+  </div>
+
+  <div class="success-state" id="success-state">
+    <div class="success-icon">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="#3B6D11" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="success-title">Aboneliğiniz başladı!</div>
+    <div class="success-sub">14 günlük ücretsiz denemeniz aktif. İstediğiniz zaman iptal edebilirsiniz.</div>
+    <button style="padding:11px 28px;background:#0F6E56;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600" onclick="window.location='04_dashboard.html'">Dashboard'a git →</button>
+  </div>
+</div>
+
+<script>
+let yearly = false;
+let selPlan = '';
+let selPrice = '';
+
+const prices = {
+  monthly: { danishman:'499', ofis:'2.499', kurumsal:'5.999' },
+  yearly:  { danishman:'399', ofis:'1.999', kurumsal:'4.799' }
+};
+
+function toggleBilling(){
+  yearly = !yearly;
+  document.getElementById('billing-toggle').classList.toggle('on', yearly);
+  document.getElementById('label-monthly').classList.toggle('active', !yearly);
+  document.getElementById('label-yearly').classList.toggle('active', yearly);
+  const p = yearly ? prices.yearly : prices.monthly;
+  document.getElementById('price-danishman').innerHTML = '₺'+p.danishman + (yearly?` <span style="font-size:13px;color:#aaa;text-decoration:line-through">₺${prices.monthly.danishman}</span>`:'');
+  document.getElementById('price-ofis').innerHTML = '₺'+p.ofis + (yearly?` <span style="font-size:13px;color:#aaa;text-decoration:line-through">₺${prices.monthly.ofis}</span>`:'');
+  document.getElementById('price-kurumsal').innerHTML = '₺'+p.kurumsal + (yearly?` <span style="font-size:13px;color:#aaa;text-decoration:line-through">₺${prices.monthly.kurumsal}</span>`:'');
+  if(selPlan) selectPlan(selPlan, document.getElementById('plan-'+selPlan).querySelector('.plan-name').textContent, p[selPlan]);
+}
+
+function selectPlan(id, name, price){
+  selPlan = id; selPrice = price;
+  ['danishman','ofis','kurumsal'].forEach(p=>{
+    document.getElementById('plan-'+p).classList.remove('selected');
+  });
+  document.getElementById('plan-'+id).classList.add('selected');
+  const card = document.getElementById('checkout-card');
+  card.classList.add('show');
+  const period = yearly ? 'yıllık' : 'aylık';
+  document.getElementById('summary').innerHTML = `
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Plan</span><span style="font-weight:600">${name}</span></div>
+    <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span>Fatura</span><span>${period}</span></div>
+    <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid #eee;font-weight:600"><span>İlk ödeme (14 gün sonra)</span><span>₺${price}</span></div>
+    <div style="font-size:11px;color:#0F6E56;margin-top:6px">✓ İlk 14 gün tamamen ücretsiz</div>
+  `;
+  card.scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+function formatCard(el){
+  let v = el.value.replace(/\D/g,'').substring(0,16);
+  el.value = v.replace(/(.{4})/g,'$1 ').trim();
+}
+
+function doPay(){
+  const btn = document.getElementById('pay-btn');
+  btn.textContent = 'İşleniyor...';
+  btn.disabled = true;
+  setTimeout(()=>{
+    document.getElementById('checkout-card').style.display='none';
+    document.getElementById('success-state').classList.add('show');
+  }, 1500);
+}
+</script>
+</body>
+</html>
