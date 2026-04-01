@@ -14,6 +14,7 @@ const nav = [
   { href: '/dashboard/mali',         icon: '💰', label: 'Mali Durum' },
   { href: '/dashboard/takvim',       icon: '📅', label: 'Takvim' },
   { href: '/dashboard/mail',         icon: '📧', label: 'Mail' },
+  { href: '/dashboard/ayarlar',      icon: '⚙️', label: 'Ayarlar' },
 ]
 
 export default function Sidebar({ profile }: { profile: any }) {
