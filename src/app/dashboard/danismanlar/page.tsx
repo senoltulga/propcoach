@@ -49,7 +49,16 @@ export default async function DanismanlarPage() {
               <div className="bg-gray-50 rounded-lg p-2 text-center"><div className="text-sm font-bold">{fmt(Number(a.m?.revenue)||0)}</div><div className="text-xs text-gray-400">Ciro</div></div>
             </div>
             <div className="flex justify-between text-xs text-gray-500 mb-1"><span>Hedefe ulaşma</span><span className="font-semibold">%{a.pct}</span></div>
-            <div className="w-full bg-gray-100 rounded-full h-2"><div className={`h-2 rounded-full ${bar(a.status)}`} style={{ width: `${Math.min(a.pct,100)}%` }} /></div>
+            <div className="w-full bg-gray-100 rounded-full h-2 mb-3"><div className={`h-2 rounded-full ${bar(a.status)}`} style={{ width: `${Math.min(a.pct,100)}%` }} /></div>
+            <div className="flex justify-end">
+              <a
+                href={`/api/pdf/cv?agent_id=${a.id}`}
+                target="_blank"
+                className="text-xs text-emerald-600 hover:text-emerald-700 font-medium border border-emerald-200 px-2 py-1 rounded-lg"
+              >
+                CV İndir ↓
+              </a>
+            </div>
           </div>
         ))}
       </div>

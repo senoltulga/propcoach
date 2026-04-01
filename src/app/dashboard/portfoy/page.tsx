@@ -51,11 +51,20 @@ export default async function PortfoyPage() {
                 <span>·</span>
                 <span className={!l.krb_uploaded ? 'text-red-500' : 'text-green-600'}>{l.krb_uploaded ? 'KRB ✓' : 'KRB Eksik !'}</span>
               </div>
-              <div className="text-xs text-gray-500 flex items-center gap-1">
-                <span className="w-4 h-4 rounded-full bg-gray-100 inline-flex items-center justify-center text-gray-600 font-bold text-xs">
-                  {(l.profiles?.full_name || '?').charAt(0)}
-                </span>
-                {l.profiles?.full_name || '—'}
+              <div className="flex items-center justify-between mt-1">
+                <div className="text-xs text-gray-500 flex items-center gap-1">
+                  <span className="w-4 h-4 rounded-full bg-gray-100 inline-flex items-center justify-center text-gray-600 font-bold text-xs">
+                    {(l.profiles?.full_name || '?').charAt(0)}
+                  </span>
+                  {l.profiles?.full_name || '—'}
+                </div>
+                <a
+                  href={`/api/pdf/krb?listing_id=${l.id}`}
+                  target="_blank"
+                  className="text-xs text-emerald-600 hover:text-emerald-700 font-medium"
+                >
+                  KRB ↓
+                </a>
               </div>
             </div>
           </div>
