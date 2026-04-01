@@ -39,9 +39,9 @@ const QUICK_PROMPTS = [
   { label: 'Performans raporu', prompt: 'Bu ayki danışman performansını özetle' },
   { label: 'KRB oluştur', prompt: 'Portföydeki ilk aktif mülk için KRB raporu oluştur' },
   { label: 'Satış sunumu', prompt: 'Ofis için profesyonel satış sunumu hazırla' },
-  { label: 'Eğitim durumu', prompt: 'Zorunlu eğitimlerin tamamlanma durumunu göster' },
+  { label: 'Lead listesi', prompt: 'Tüm müşteri leadlerimi listele ve durumlarını özetle' },
+  { label: 'Randevu oluştur', prompt: 'Yarın saat 14:00\'te Kadıköy\'de mülk gösterimi için randevu oluştur' },
   { label: 'Piyasa analizi', prompt: 'Portföye dayalı piyasa analizi sunumu oluştur' },
-  { label: 'Ofis performans raporu', prompt: 'Mart 2026 ofis performans raporu sunumu hazırla' },
 ]
 
 function PresentationViewer({ slides, title }: { slides: Slide[]; title: string }) {
@@ -118,11 +118,12 @@ function ArtifactCard({ artifact }: { artifact: Artifact }) {
 }
 
 export default function AgentChat() {
+  const sessionId = useRef(`session_${Date.now()}`).current
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '0',
       role: 'assistant',
-      content: 'Merhaba! Ben PropCoach AI Asistanınım. KRB raporu, sunum, performans analizi, takvim etkinliği, mail ve daha fazlası için bana yazabilirsiniz.',
+      content: 'Merhaba! Ben PropCoach AI Asistanınım. KRB raporu, sunum, performans analizi, lead yönetimi, randevu, takvim, mail ve daha fazlası için bana yazabilirsiniz.',
     },
   ])
   const [input, setInput] = useState('')
@@ -153,7 +154,7 @@ export default function AgentChat() {
       const res = await fetch('/api/agent', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: history }),
+        body: JSON.stringify({ messages: history, session_id: sessionId }),
       })
       const data = await res.json()
 

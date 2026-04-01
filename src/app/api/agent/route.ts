@@ -6,7 +6,11 @@ import { google } from 'googleapis'
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-const SYSTEM_PROMPT = `Sen PropCoach AI Asistanısın — Türk emlak ofisleri için tasarlanmış çok yetenekli bir asistan.
+function buildSystemPrompt(memories: any[]): string {
+  const memCtx = memories.length > 0
+    ? '\n\nKullanıcı hakkında bilinen bilgiler:\n' + memories.map((m: any) => `- ${m.content}`).join('\n')
+    : ''
+  return `Sen PropCoach AI Asistanısın — Türk emlak ofisleri için tasarlanmış çok yetenekli bir asistan.
 
 Görevlerin:
 - Ofis ve danışman performansını analiz et
@@ -16,13 +20,52 @@ Görevlerin:
 - Gmail üzerinden mail gönder
 - Danışman eğitim durumunu takip et
 - Portföydeki ilanları ara ve filtrele
+- CRM: lead takibi, randevu oluşturma, pipeline yönetimi
 
 Kullanıcı senden bir şey istediğinde önce uygun araçları kullanarak gerçek veriyi al, sonra net ve yararlı bir yanıt ver.
 Araç kullanırken kullanıcıya ne yaptığını kısaca belirt.
 Yanıtların Türkçe olsun. Sonuçları maddeler halinde, sade ve net sun.
-Sunum oluştururken içeriği zengin ve profesyonel tut.`
+Sunum oluştururken içeriği zengin ve profesyonel tut.${memCtx}`
+}
 
 const tools: Anthropic.Tool[] = [
+  {
+    name: 'manage_leads',
+    description: 'CRM: Lead listele, yeni lead ekle veya lead durumunu güncelle.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        action: { type: 'string', enum: ['list', 'add', 'update_status'] },
+        type: { type: 'string', enum: ['client', 'agent'], description: 'Lead tipi' },
+        status: { type: 'string', description: 'Filtre veya yeni durum' },
+        full_name: { type: 'string' },
+        phone: { type: 'string' },
+        email: { type: 'string' },
+        budget: { type: 'number' },
+        notes: { type: 'string' },
+        lead_id: { type: 'string', description: 'Güncelleme için lead ID' },
+      },
+      required: ['action'],
+    },
+  },
+  {
+    name: 'manage_appointments',
+    description: 'CRM: Randevu listele veya yeni randevu oluştur. Google Calendar ile senkronize eder.',
+    input_schema: {
+      type: 'object' as const,
+      properties: {
+        action: { type: 'string', enum: ['list', 'create'] },
+        title: { type: 'string' },
+        appointment_date: { type: 'string', description: 'ISO datetime: 2026-04-15T14:00:00' },
+        duration_minutes: { type: 'number' },
+        location: { type: 'string' },
+        type: { type: 'string', enum: ['meeting', 'showing', 'call', 'other'] },
+        lead_id: { type: 'string' },
+        add_to_calendar: { type: 'boolean' },
+      },
+      required: ['action'],
+    },
+  },
   {
     name: 'search_listings',
     description: 'Portföydeki ilanları ara. Fiyat aralığı, durum veya anahtar kelimeye göre filtrele.',
@@ -127,6 +170,69 @@ async function executeTool(
   integration: any,
 ): Promise<{ data: any; display: string; artifact?: any }> {
   switch (toolName) {
+
+    case 'manage_leads': {
+      if (input.action === 'list') {
+        let q = supabase.from('leads').select('*').eq('office_id', officeId)
+        if (input.type) q = q.eq('type', input.type)
+        if (input.status) q = q.eq('status', input.status)
+        const { data } = await q.order('created_at', { ascending: false }).limit(10)
+        return { data: data || [], display: `${(data || []).length} lead listelendi` }
+      }
+      if (input.action === 'add') {
+        const { data } = await supabase.from('leads').insert({
+          office_id: officeId, full_name: input.full_name, phone: input.phone || null,
+          email: input.email || null, type: input.type || 'client', source: 'manual',
+          status: 'new', budget: input.budget || null, notes: input.notes || null,
+        }).select().single()
+        return { data, display: `✓ Lead eklendi: ${input.full_name}` }
+      }
+      if (input.action === 'update_status' && input.lead_id) {
+        const { data } = await supabase.from('leads').update({ status: input.status, updated_at: new Date().toISOString() })
+          .eq('id', input.lead_id).select().single()
+        return { data, display: `✓ Lead durumu güncellendi: ${input.status}` }
+      }
+      return { data: {}, display: 'Geçersiz action' }
+    }
+
+    case 'manage_appointments': {
+      if (input.action === 'list') {
+        const { data } = await supabase.from('appointments')
+          .select('*, profiles!agent_id(full_name), leads(full_name)')
+          .eq('office_id', officeId).eq('status', 'planned')
+          .gte('appointment_date', new Date().toISOString())
+          .order('appointment_date').limit(10)
+        return { data: data || [], display: `${(data || []).length} randevu bulundu` }
+      }
+      if (input.action === 'create') {
+        let calendarEventId = null
+        if (input.add_to_calendar && integration?.access_token) {
+          try {
+            const auth = getClientWithTokens(integration.access_token, integration.refresh_token)
+            const calendar = google.calendar({ version: 'v3', auth })
+            const start = new Date(input.appointment_date)
+            const end = new Date(start.getTime() + (input.duration_minutes || 60) * 60000)
+            const event = await calendar.events.insert({
+              calendarId: 'primary',
+              requestBody: { summary: input.title, location: input.location || '',
+                start: { dateTime: start.toISOString(), timeZone: 'Europe/Istanbul' },
+                end: { dateTime: end.toISOString(), timeZone: 'Europe/Istanbul' } },
+            })
+            calendarEventId = event.data.id
+          } catch { /* opsiyonel */ }
+        }
+        const { data } = await supabase.from('appointments').insert({
+          office_id: officeId, title: input.title,
+          appointment_date: input.appointment_date,
+          duration_minutes: input.duration_minutes || 60,
+          location: input.location || null, type: input.type || 'meeting',
+          lead_id: input.lead_id || null, status: 'planned',
+          calendar_event_id: calendarEventId,
+        }).select().single()
+        return { data, display: `✓ Randevu oluşturuldu: ${input.title}${calendarEventId ? ' (Takvime eklendi)' : ''}` }
+      }
+      return { data: {}, display: 'Geçersiz action' }
+    }
 
     case 'search_listings': {
       let q = supabase
@@ -327,7 +433,27 @@ export async function POST(req: NextRequest) {
   const { data: integration } = await supabase
     .from('integrations').select('*').eq('user_id', user.id).eq('provider', 'google').maybeSingle()
 
-  const { messages } = await req.json()
+  const { messages, session_id } = await req.json()
+  const sessionId = session_id || 'default'
+
+  // Hafızayı yükle
+  const { data: memories } = await supabase
+    .from('agent_memory')
+    .select('content,memory_type,importance')
+    .eq('user_id', user.id)
+    .order('importance', { ascending: false })
+    .limit(8)
+
+  const systemPrompt = buildSystemPrompt(memories || [])
+
+  // Son kullanıcı mesajını hafızaya kaydet (arka planda)
+  const lastUserMsg = [...messages].reverse().find((m: any) => m.role === 'user')
+  if (lastUserMsg) {
+    supabase.from('conversation_history').insert({
+      user_id: user.id, session_id: sessionId,
+      role: 'user', content: lastUserMsg.content,
+    }).then(() => {})
+  }
 
   let currentMessages = messages
   const toolCallLog: any[] = []
@@ -339,7 +465,7 @@ export async function POST(req: NextRequest) {
     const response = await anthropic.messages.create({
       model: 'claude-haiku-4-5-20251001',
       max_tokens: 4096,
-      system: SYSTEM_PROMPT,
+      system: systemPrompt,
       tools,
       messages: currentMessages,
     })
@@ -366,6 +492,16 @@ export async function POST(req: NextRequest) {
         { role: 'user', content: toolResults },
       ]
     }
+  }
+
+  // Asistan yanıtını hafızaya kaydet
+  if (finalResponse) {
+    supabase.from('conversation_history').insert({
+      user_id: user.id, session_id: sessionId,
+      role: 'assistant', content: finalResponse,
+      tool_calls: toolCallLog.length > 0 ? toolCallLog : null,
+      artifacts: artifacts.length > 0 ? artifacts : null,
+    }).then(() => {})
   }
 
   return NextResponse.json({ response: finalResponse, tool_calls: toolCallLog, artifacts })

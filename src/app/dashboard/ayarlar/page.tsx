@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 export default async function AyarlarPage({
   searchParams,
 }: {
-  searchParams: { google?: string }
+  searchParams: { google?: string; msg?: string }
 }) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -43,6 +43,9 @@ export default async function AyarlarPage({
           'bg-gray-50 text-gray-600 border border-gray-200'
         }`}>
           {statusMsg}
+          {searchParams.msg && (
+            <div className="mt-1 text-xs font-mono opacity-75">{searchParams.msg}</div>
+          )}
         </div>
       )}
 
@@ -101,6 +104,37 @@ export default async function AyarlarPage({
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Telegram Bağlantısı */}
+      <div>
+        <h2 className="text-sm font-semibold text-gray-700 mb-3">Telegram Bot</h2>
+        <div className="bg-white rounded-xl border border-gray-100 p-5 space-y-3">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">✈️</span>
+            <div className="flex-1">
+              <div className="font-semibold text-gray-900">PropCoach Telegram Botu</div>
+              <div className="text-xs text-gray-500 mt-0.5 mb-3">
+                Ofis dışında performans, ilanlar, randevular ve lead yönetimi için Telegram üzerinden erişin.
+              </div>
+              <div className="bg-gray-50 rounded-lg p-3 text-xs text-gray-600 space-y-1">
+                <div>1. Telegram&apos;da <strong>@propcoach_ai_bot</strong> &apos;u arayın</div>
+                <div>2. <code className="bg-gray-200 px-1 rounded">/start</code> yazın</div>
+                <div>3. Size bir bağlantı kodu verilecek &mdash; buraya girin</div>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              placeholder="Telegram bağlantı kodu (ör: AB1234)"
+              className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <button className="px-4 py-2 bg-blue-500 text-white text-sm rounded-lg hover:bg-blue-600 transition-colors">
+              Bağla
+            </button>
+          </div>
         </div>
       </div>
 

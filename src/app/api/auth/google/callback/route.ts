@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getOAuthClient } from '@/lib/google'
 
+export const dynamic = 'force-dynamic'
+
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://propcoach-kappa.vercel.app'
 
 // GET /api/auth/google/callback?code=...&state=userId
@@ -58,7 +60,8 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.redirect(`${BASE_URL}/dashboard/ayarlar?google=success`)
   } catch (err) {
+    const msg = err instanceof Error ? err.message.slice(0, 100) : String(err).slice(0, 100)
     console.error('Google callback error:', err)
-    return NextResponse.redirect(`${BASE_URL}/dashboard/ayarlar?google=error`)
+    return NextResponse.redirect(`${BASE_URL}/dashboard/ayarlar?google=error&msg=${encodeURIComponent(msg)}`)
   }
 }

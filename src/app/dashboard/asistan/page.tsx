@@ -26,7 +26,8 @@ export default function AsistanPage() {
           { icon: '📊', label: 'Performans' },
           { icon: '📄', label: 'KRB Raporu' },
           { icon: '🎨', label: 'Sunum' },
-          { icon: '📅', label: 'Takvim' },
+          { icon: '🎯', label: 'Lead & CRM' },
+          { icon: '📅', label: 'Randevu' },
           { icon: '📧', label: 'Mail' },
           { icon: '🎓', label: 'Eğitim' },
         ].map(t => (
