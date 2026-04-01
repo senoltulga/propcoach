@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import AddMyTrainingButton from './AddMyTrainingButton'
 
 export default async function PanelPage() {
   const supabase = await createClient()
@@ -9,33 +10,48 @@ export default async function PanelPage() {
   const { data: profile } = await supabase
     .from('profiles').select('*').eq('id', user.id).single()
 
-  // Ofis yöneticisiyse dashboard'a yönlendir
   if (profile?.role === 'office_owner' || profile?.role === 'office_manager') {
     redirect('/dashboard')
   }
 
-  // Bu ayki metrikler (Mart 2026)
-  const { data: metrics } = await supabase
-    .from('agent_metrics')
-    .select('*')
-    .eq('agent_id', user.id)
-    .eq('month', 3)
-    .eq('year', 2026)
-    .single()
+  const officeId = profile?.office_id
 
-  // Müşteriler
-  const { data: clients } = await supabase
-    .from('clients')
-    .select('*')
-    .eq('agent_id', user.id)
-    .order('created_at', { ascending: false })
-
-  // İlanlar
-  const { data: listings } = await supabase
-    .from('listings')
-    .select('*')
-    .eq('agent_id', user.id)
-    .order('created_at', { ascending: false })
+  const [
+    { data: metrics },
+    { data: clients },
+    { data: listings },
+    { data: myTrainings },
+    { data: mandatory },
+  ] = await Promise.all([
+    supabase
+      .from('agent_metrics')
+      .select('*')
+      .eq('agent_id', user.id)
+      .eq('month', 3)
+      .eq('year', 2026)
+      .single(),
+    supabase
+      .from('clients')
+      .select('*')
+      .eq('agent_id', user.id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('listings')
+      .select('*')
+      .eq('agent_id', user.id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('agent_trainings')
+      .select('*')
+      .eq('agent_id', user.id)
+      .order('training_date', { ascending: false }),
+    supabase
+      .from('mandatory_trainings')
+      .select('*')
+      .eq('office_id', officeId)
+      .eq('is_active', true)
+      .order('deadline', { ascending: true }),
+  ])
 
   const salesCount = metrics?.sales_count ?? 0
   const revenue = metrics?.revenue ?? 0
@@ -51,6 +67,13 @@ export default async function PanelPage() {
   const statusDot = targetRate >= 80 ? 'bg-green-500' : targetRate >= 50 ? 'bg-yellow-500' : 'bg-red-500'
   const statusLabel = targetRate >= 80 ? 'Hedefe ulaşıyor' : targetRate >= 50 ? 'Takipte' : 'Kritik seviye'
   const statusColor = targetRate >= 80 ? 'text-green-700 bg-green-50' : targetRate >= 50 ? 'text-yellow-700 bg-yellow-50' : 'text-red-700 bg-red-50'
+
+  const completedMandatoryIds = new Set((myTrainings || []).map((t: any) => t.mandatory_training_id).filter(Boolean))
+
+  const categoryLabel: Record<string, string> = {
+    hukuki: 'Hukuki', satis: 'Satış', teknik: 'Teknik',
+    kisisel_gelisim: 'Kişisel Gelişim', genel: 'Genel',
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -126,7 +149,7 @@ export default async function PanelPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
 
           {/* Müşteriler */}
           <div className="bg-white rounded-xl border shadow-sm p-6">
@@ -157,8 +180,8 @@ export default async function PanelPage() {
                     </span>
                   </div>
                 ))}
-                {clients.length > 5 && (
-                  <p className="text-xs text-gray-400 text-center pt-1">+{clients.length - 5} daha</p>
+                {(clients?.length ?? 0) > 5 && (
+                  <p className="text-xs text-gray-400 text-center pt-1">+{clients!.length - 5} daha</p>
                 )}
               </div>
             )}
@@ -188,8 +211,85 @@ export default async function PanelPage() {
                     </span>
                   </div>
                 ))}
-                {listings.length > 5 && (
-                  <p className="text-xs text-gray-400 text-center pt-1">+{listings.length - 5} daha</p>
+                {(listings?.length ?? 0) > 5 && (
+                  <p className="text-xs text-gray-400 text-center pt-1">+{listings!.length - 5} daha</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── Eğitimler ───────────────────────────────────── */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+
+          {/* Zorunlu Eğitimler */}
+          <div className="bg-white rounded-xl border shadow-sm p-6">
+            <h2 className="text-sm font-semibold text-gray-900 mb-4">Zorunlu Eğitimler</h2>
+            {!mandatory || mandatory.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-4">Zorunlu eğitim tanımlanmamış</p>
+            ) : (
+              <div className="space-y-3">
+                {mandatory.map((m: any) => {
+                  const done = completedMandatoryIds.has(m.id)
+                  const isOverdue = m.deadline && new Date(m.deadline) < new Date() && !done
+                  return (
+                    <div key={m.id} className={`flex items-start gap-3 p-3 rounded-lg border ${
+                      done ? 'border-emerald-100 bg-emerald-50' :
+                      isOverdue ? 'border-red-100 bg-red-50' :
+                      'border-gray-100'
+                    }`}>
+                      <span className={`mt-0.5 text-base ${done ? 'text-emerald-500' : 'text-gray-300'}`}>
+                        {done ? '✓' : '○'}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className={`text-sm font-medium ${done ? 'text-emerald-800 line-through' : 'text-gray-900'}`}>
+                          {m.title}
+                        </p>
+                        <p className={`text-xs mt-0.5 ${
+                          isOverdue ? 'text-red-500 font-medium' :
+                          done ? 'text-emerald-600' : 'text-gray-400'
+                        }`}>
+                          {done ? 'Tamamlandı' :
+                           isOverdue ? `⚠️ Gecikmiş — ${new Date(m.deadline).toLocaleDateString('tr-TR')}` :
+                           m.deadline ? `Son: ${new Date(m.deadline).toLocaleDateString('tr-TR')}` : ''}
+                        </p>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Aldığım Eğitimler */}
+          <div className="bg-white rounded-xl border shadow-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-sm font-semibold text-gray-900">Aldığım Eğitimler</h2>
+              <AddMyTrainingButton />
+            </div>
+            {!myTrainings || myTrainings.length === 0 ? (
+              <p className="text-sm text-gray-400 text-center py-4">Henüz eğitim kaydı yok</p>
+            ) : (
+              <div className="space-y-3">
+                {myTrainings.slice(0, 6).map((t: any) => (
+                  <div key={t.id} className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 truncate">{t.title}</p>
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {categoryLabel[t.category] ?? t.category} · {new Date(t.training_date).toLocaleDateString('tr-TR')}
+                      </p>
+                    </div>
+                    {t.score != null && (
+                      <span className={`ml-3 shrink-0 text-xs font-semibold px-2 py-0.5 rounded-full ${
+                        t.score >= 80 ? 'bg-emerald-100 text-emerald-700' :
+                        t.score >= 60 ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-red-100 text-red-600'
+                      }`}>{t.score}</span>
+                    )}
+                  </div>
+                ))}
+                {myTrainings.length > 6 && (
+                  <p className="text-xs text-gray-400 text-center pt-1">+{myTrainings.length - 6} daha</p>
                 )}
               </div>
             )}
@@ -197,7 +297,7 @@ export default async function PanelPage() {
         </div>
 
         {/* AI Koçluk Kartı */}
-        <div className="mt-6 bg-emerald-700 rounded-2xl p-6 flex items-center justify-between flex-wrap gap-4">
+        <div className="bg-emerald-700 rounded-2xl p-6 flex items-center justify-between flex-wrap gap-4">
           <div>
             <h3 className="text-white font-semibold text-base mb-1">AI Koçunuzla görüşün</h3>
             <p className="text-emerald-200 text-sm">Performansınıza göre kişiselleştirilmiş öneriler alın.</p>
