@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { google } from 'googleapis'
+import { Readable } from 'stream'
 import { createClient } from '@/lib/supabase/server'
 import { getClientWithTokens } from '@/lib/google'
 
@@ -74,10 +75,12 @@ export async function POST(req: NextRequest) {
   }
 
   const arrayBuffer = await file.arrayBuffer()
+  const buffer = Buffer.from(arrayBuffer)
+  const stream = Readable.from(buffer)
 
   const { data: uploaded } = await drive.files.create({
     requestBody: { name: file.name, parents: [folderId] },
-    media: { mimeType: file.type, body: Buffer.from(arrayBuffer) },
+    media: { mimeType: file.type || 'application/octet-stream', body: stream },
     fields: 'id,name,webViewLink',
   })
 
