@@ -31,10 +31,10 @@ export async function POST() {
   if (!clientsCheck.data || clientsCheck.data.length === 0) {
     await supabase.from('clients').insert([
       { agent_id: uid, office_id: officeId, full_name: 'Ahmet Yılmaz', status: 'active', budget: 3500000, notes: 'Kadıköy civarında 3+1 arıyor' },
-      { agent_id: uid, office_id: officeId, full_name: 'Fatma Kaya', status: 'active', budget: 5200000, notes: 'Beşiktaş'ta dubleks tercih ediyor' },
+      { agent_id: uid, office_id: officeId, full_name: 'Fatma Kaya', status: 'active', budget: 5200000, notes: "Beşiktaş'ta dubleks tercih ediyor" },
       { agent_id: uid, office_id: officeId, full_name: 'Mehmet Demir', status: 'passive', budget: 2800000, notes: 'Bütçesi sınırlı, esnek değil' },
       { agent_id: uid, office_id: officeId, full_name: 'Ayşe Çelik', status: 'active', budget: 7000000, notes: 'Boğaz manzaralı villa istiyor' },
-      { agent_id: uid, office_id: officeId, full_name: 'Hasan Öztürk', status: 'closed', budget: 4100000, notes: 'Ataşehir'de 2+1 aldı, kapandı' },
+      { agent_id: uid, office_id: officeId, full_name: 'Hasan Öztürk', status: 'closed', budget: 4100000, notes: "Ataşehir'de 2+1 aldı, kapandı" },
     ])
   }
 
