@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import AddMyTrainingButton from './AddMyTrainingButton'
+import SeedButton from './SeedButton'
 
 export default async function PanelPage() {
   const supabase = await createClient()
@@ -16,6 +17,10 @@ export default async function PanelPage() {
 
   const officeId = profile?.office_id
 
+  const now = new Date()
+  const currentMonth = now.getMonth() + 1
+  const currentYear = now.getFullYear()
+
   const [
     { data: metrics },
     { data: clients },
@@ -27,9 +32,9 @@ export default async function PanelPage() {
       .from('agent_metrics')
       .select('*')
       .eq('agent_id', user.id)
-      .eq('month', 3)
-      .eq('year', 2026)
-      .single(),
+      .eq('month', currentMonth)
+      .eq('year', currentYear)
+      .maybeSingle(),
     supabase
       .from('clients')
       .select('*')
@@ -99,7 +104,7 @@ export default async function PanelPage() {
         <div className="flex items-start justify-between mb-8 flex-wrap gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Merhaba, {profile?.full_name?.split(' ')[0] || 'Danışman'} 👋</h1>
-            <p className="text-gray-500 text-sm mt-1">Mart 2026 performans özeti</p>
+            <p className="text-gray-500 text-sm mt-1">{now.toLocaleDateString('tr-TR', { month: 'long', year: 'numeric' })} performans özeti</p>
           </div>
           <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${statusColor}`}>
             <span className={`w-1.5 h-1.5 rounded-full ${statusDot}`} />
@@ -130,6 +135,17 @@ export default async function PanelPage() {
             <p className="text-xs text-gray-400 mt-1">{meetingsCount} görüşmeden</p>
           </div>
         </div>
+
+        {/* Demo veri yoksa yükleme butonu */}
+        {!metrics && !clients?.length && !listings?.length && (
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-5 mb-6 flex items-center justify-between gap-4 flex-wrap">
+            <div>
+              <p className="text-sm font-semibold text-blue-800">Henüz veri yok</p>
+              <p className="text-xs text-blue-600 mt-0.5">Demo veriler yükleyerek tüm modüllerin çalışmasını görebilirsiniz.</p>
+            </div>
+            <SeedButton />
+          </div>
+        )}
 
         {/* Hedefe ulaşma */}
         <div className="bg-white rounded-xl border shadow-sm p-6 mb-6">
