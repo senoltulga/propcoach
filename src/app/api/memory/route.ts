@@ -88,9 +88,13 @@ export async function DELETE(req: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  const { type, session_id } = await req.json()
+  const body = await req.json()
+  const { type, session_id, memory_id } = body
 
-  if (type === 'history' && session_id) {
+  if (memory_id) {
+    // Tekil hafıza sil
+    await supabase.from('agent_memory').delete().eq('id', memory_id).eq('user_id', user.id)
+  } else if (type === 'history' && session_id) {
     await supabase.from('conversation_history').delete().eq('user_id', user.id).eq('session_id', session_id)
   } else if (type === 'memory') {
     await supabase.from('agent_memory').delete().eq('user_id', user.id)

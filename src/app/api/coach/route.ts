@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import { createClient } from '@/lib/supabase/server'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 // ─── Program sistem promptları ────────────────────────────────────────────────
 const BASE_PROMPT = `Sen PropCoach — Türk gayrimenkul sektörüne özel, veriye dayalı bir AI koçusun.
@@ -193,6 +195,30 @@ async function executeCoachTool(
   }
 }
 
+// ─── RAG: Doküman vektör arama ───────────────────────────────────────────────
+async function searchDocuments(supabase: any, userId: string, query: string): Promise<string> {
+  if (!process.env.OPENAI_API_KEY) return ''
+  try {
+    const embRes = await openai.embeddings.create({
+      model: 'text-embedding-3-small',
+      input: query,
+    })
+    const embedding = embRes.data[0].embedding
+
+    const { data: chunks } = await supabase.rpc('match_chunks', {
+      query_embedding: JSON.stringify(embedding),
+      match_user_id: userId,
+      match_count: 4,
+      similarity_threshold: 0.3,
+    })
+
+    if (!chunks || chunks.length === 0) return ''
+
+    return '\n\nİlgili doküman bilgisi:\n' +
+      chunks.map((c: any) => `[${c.doc_title}]: ${c.content}`).join('\n\n')
+  } catch { return '' }
+}
+
 // ─── RAG: Kişisel hafızayı yükle ─────────────────────────────────────────────
 async function loadMemoryContext(supabase: any, userId: string): Promise<string> {
   const [{ data: memories }, { data: history }] = await Promise.all([
@@ -227,6 +253,9 @@ export async function POST(req: NextRequest) {
     let userId = ''
     let officeId = ''
 
+    // Son kullanıcı mesajını al (doküman araması için)
+    const lastUserMessage = [...messages].reverse().find((m: any) => m.role === 'user')?.content || ''
+
     if (user) {
       userId = user.id
       const { data: profile } = await supabase.from('profiles').select('office_id').eq('id', user.id).single()
@@ -234,9 +263,14 @@ export async function POST(req: NextRequest) {
       memoryContext = await loadMemoryContext(supabase, userId)
     }
 
+    // Doküman RAG araması (kullanıcı girişi varsa)
+    const docContext = user && lastUserMessage
+      ? await searchDocuments(supabase, userId, lastUserMessage)
+      : ''
+
     const systemPrompt = `${BASE_PROMPT}
 
-Program: ${programPrompt}${memoryContext}`
+Program: ${programPrompt}${memoryContext}${docContext}`
 
     let currentMessages = messages.map((m: any) => ({ role: m.role as 'user' | 'assistant', content: m.content }))
     let finalReply = ''

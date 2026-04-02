@@ -3,8 +3,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const nav = [
-  { href: '/panel',         icon: '🏠', label: 'Ana Sayfa' },
-  { href: '/panel/kocluk',  icon: '🎯', label: 'Koçluk' },
+  { href: '/panel',          icon: '🏠', label: 'Ana Sayfa' },
+  { href: '/panel/kocluk',   icon: '🎯', label: 'Koçluk' },
+  { href: '/panel/dokuman',  icon: '🧠', label: 'Hafıza & Doküman' },
 ]
 
 export default function PanelNav() {
