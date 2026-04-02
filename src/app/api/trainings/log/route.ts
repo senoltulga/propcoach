@@ -20,18 +20,13 @@ export async function POST(req: NextRequest) {
   const isManager = profile?.role === 'office_owner' || profile?.role === 'office_manager'
   const targetAgentId = (isManager && agent_id) ? agent_id : user.id
 
-  // office_id: önce kendi profilden al, yoksa hedef danışmanın profilinden, yoksa user.id (FK profiles(id)'e)
+  // office_id: hedef danışmanın profilinden al — en güvenilir yol
   let officeId: string | null = profile?.office_id || null
 
-  if (!officeId && profile?.role === 'office_owner') {
-    // office_owner kendi id'si hem profiles.id hem de officeId olarak geçerli
-    officeId = user.id
-  }
-
-  if (!officeId && isManager && agent_id) {
+  if (isManager && agent_id) {
     const { data: agentProfile } = await supabase
       .from('profiles').select('office_id').eq('id', agent_id).single()
-    officeId = agentProfile?.office_id || null
+    if (agentProfile?.office_id) officeId = agentProfile.office_id
   }
 
   const insertData: Record<string, any> = {
