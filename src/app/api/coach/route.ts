@@ -4,7 +4,7 @@ import OpenAI from 'openai'
 import { createClient } from '@/lib/supabase/server'
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const getOpenAI = () => new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'missing' })
 
 // ─── Program sistem promptları ────────────────────────────────────────────────
 const BASE_PROMPT = `Sen PropCoach — Türk gayrimenkul sektörüne özel, veriye dayalı bir AI koçusun.
@@ -199,7 +199,7 @@ async function executeCoachTool(
 async function searchDocuments(supabase: any, userId: string, query: string): Promise<string> {
   if (!process.env.OPENAI_API_KEY) return ''
   try {
-    const embRes = await openai.embeddings.create({
+    const embRes = await getOpenAI().embeddings.create({
       model: 'text-embedding-3-small',
       input: query,
     })

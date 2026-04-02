@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import OpenAI from 'openai'
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+const getOpenAI = () => new OpenAI({ apiKey: process.env.OPENAI_API_KEY || 'missing' })
 
 // Metni ~1000 karakterlik chunk'lara böl, 200 karakter overlap
 function chunkText(text: string, size = 1000, overlap = 200): string[] {
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     if (docErr) return NextResponse.json({ error: docErr.message }, { status: 500 })
 
     // Her chunk'ı embed et ve kaydet
-    const embeddings = await openai.embeddings.create({
+    const embeddings = await getOpenAI().embeddings.create({
       model: 'text-embedding-3-small',
       input: chunks,
     })
