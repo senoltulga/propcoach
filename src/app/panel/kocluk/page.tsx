@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import PanelNav from '../PanelNav'
 
 const PROGRAMS = [
   { id: 'serbest',   label: 'Serbest Görüşme',    icon: '💬', desc: 'Aklındaki her konuyu konuş' },
@@ -62,11 +63,14 @@ export default function KoclukPage() {
 
   if (!program) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-2xl mx-auto">
-          <div className="flex items-center gap-3 mb-8">
-            <a href="/panel" className="text-gray-400 hover:text-gray-600 text-sm">← Panele Dön</a>
+      <div className="min-h-screen bg-gray-50">
+        <header className="bg-white border-b">
+          <div className="px-6 py-3">
+            <span className="text-base font-bold text-emerald-700">PropCoach</span>
           </div>
+          <PanelNav />
+        </header>
+        <div className="max-w-2xl mx-auto p-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">AI Koçluk Seansı</h1>
           <p className="text-gray-500 text-sm mb-8">Bir program seçin ve koçluk seansınızı başlatın.</p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

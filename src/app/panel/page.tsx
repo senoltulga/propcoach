@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import AddMyTrainingButton from './AddMyTrainingButton'
 import SeedButton from './SeedButton'
+import PanelNav from './PanelNav'
 
 export default async function PanelPage() {
   const supabase = await createClient()
@@ -83,19 +84,22 @@ export default async function PanelPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white border-b px-6 py-4 flex justify-between items-center">
-        <span className="text-base font-bold text-emerald-700">PropCoach</span>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-semibold text-xs">
-              {profile?.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || 'D'}
+      <header className="bg-white border-b">
+        <div className="flex items-center justify-between px-6 py-3">
+          <span className="text-base font-bold text-emerald-700">PropCoach</span>
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-semibold text-xs">
+                {profile?.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || 'D'}
+              </div>
+              <span className="text-sm text-gray-700 hidden sm:block">{profile?.full_name || user.email}</span>
             </div>
-            <span className="text-sm text-gray-700">{profile?.full_name || user.email}</span>
+            <form action="/api/auth/signout" method="POST">
+              <button className="text-sm text-red-400 hover:text-red-600">↩</button>
+            </form>
           </div>
-          <form action="/api/auth/signout" method="POST">
-            <button className="text-sm text-red-500 hover:underline">Çıkış</button>
-          </form>
         </div>
+        <PanelNav />
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-8">

@@ -10,9 +10,13 @@ export default async function DanismanlarPage() {
   const { data: profile } = await supabase.from('profiles').select('office_id').eq('id', user!.id).single()
   const officeId = profile?.office_id || '11111111-1111-1111-1111-111111111111'
 
+  const now = new Date()
+  const currentMonth = now.getMonth() + 1
+  const currentYear = now.getFullYear()
+
   const [{ data: agents }, { data: metrics }] = await Promise.all([
-    supabase.from('profiles').select('*').eq('office_id', officeId).neq('role','office_owner'),
-    supabase.from('agent_metrics').select('*').eq('month', 3).eq('year', 2026),
+    supabase.from('profiles').select('*').eq('office_id', officeId).in('role', ['agent', 'office_manager', 'office_owner']),
+    supabase.from('agent_metrics').select('*').eq('month', currentMonth).eq('year', currentYear),
   ])
 
   const metricsMap = Object.fromEntries((metrics || []).map(m => [m.agent_id, m]))
@@ -38,7 +42,11 @@ export default async function DanismanlarPage() {
           <div key={a.id} className={`bg-white rounded-xl border p-5 ${a.status === 'critical' ? 'border-red-200' : ''}`}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${avatarColor(a.i)}`}>{initials(a.full_name)}</div>
+                {a.avatar_url ? (
+                  <img src={a.avatar_url} alt={a.full_name} className="w-10 h-10 rounded-full object-cover" />
+                ) : (
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${avatarColor(a.i)}`}>{initials(a.full_name)}</div>
+                )}
                 <div><div className="font-semibold">{a.full_name}</div><div className="text-xs text-gray-400">{a.email}</div></div>
               </div>
               <span className={`px-2 py-1 rounded-full text-xs font-semibold ${badge(a.status)}`}>{label(a.status)}</span>

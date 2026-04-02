@@ -37,15 +37,16 @@ export default async function EgitimPage() {
       .order('deadline', { ascending: true }),
     supabase
       .from('agent_trainings')
-      .select('*, profiles!agent_id(full_name)')
+      .select('*, profiles!agent_id(full_name, avatar_url)')
       .eq('office_id', officeId)
       .order('training_date', { ascending: false })
       .limit(50),
     supabase
       .from('profiles')
-      .select('id, full_name')
+      .select('id, full_name, role, avatar_url')
       .eq('office_id', officeId)
-      .eq('role', 'agent'),
+      .in('role', ['agent', 'office_manager', 'office_owner'])
+      .order('full_name'),
   ])
 
   const typeLabel: Record<string, string> = {
@@ -175,7 +176,18 @@ export default async function EgitimPage() {
               <tbody>
                 {agentTrainings.map((t: any) => (
                   <tr key={t.id} className="border-b border-gray-50 hover:bg-gray-50">
-                    <td className="px-4 py-3 font-medium text-gray-900">{t.profiles?.full_name || '—'}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        {t.profiles?.avatar_url ? (
+                          <img src={t.profiles.avatar_url} alt="" className="w-6 h-6 rounded-full object-cover flex-shrink-0" />
+                        ) : (
+                          <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold flex-shrink-0">
+                            {t.profiles?.full_name?.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase() || '?'}
+                          </div>
+                        )}
+                        <span className="font-medium text-gray-900">{t.profiles?.full_name || '—'}</span>
+                      </div>
+                    </td>
                     <td className="px-4 py-3 text-gray-700">
                       {t.title}
                       {t.mandatory_training_id && (
