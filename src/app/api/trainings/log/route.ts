@@ -9,7 +9,8 @@ export async function POST(req: NextRequest) {
   const { data: profile } = await supabase
     .from('profiles').select('office_id, role').eq('id', user.id).single()
 
-  const officeId = profile?.office_id ?? user.id
+  // office_owner kendi id'si üzerinde ofis sahibi — office_id onlar için null olabilir
+  const officeId = profile?.office_id || null
   const body = await req.json()
   const { agent_id, title, category, training_date, score, notes, mandatory_training_id } = body
 
@@ -22,18 +23,20 @@ export async function POST(req: NextRequest) {
     (profile?.role === 'office_owner' || profile?.role === 'office_manager') && agent_id
   ) ? agent_id : user.id
 
+  const insertData: Record<string, any> = {
+    agent_id: targetAgentId,
+    title,
+    category: category || 'genel',
+    training_date,
+    score: score ?? null,
+    notes: notes || null,
+    mandatory_training_id: mandatory_training_id || null,
+  }
+  if (officeId) insertData.office_id = officeId
+
   const { data, error } = await supabase
     .from('agent_trainings')
-    .insert({
-      agent_id: targetAgentId,
-      office_id: officeId,
-      title,
-      category: category || 'genel',
-      training_date,
-      score: score ?? null,
-      notes: notes || null,
-      mandatory_training_id: mandatory_training_id || null,
-    })
+    .insert(insertData)
     .select()
     .single()
 
