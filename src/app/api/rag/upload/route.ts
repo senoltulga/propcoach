@@ -17,13 +17,14 @@ function chunkText(text: string, size = 1000, overlap = 200): string[] {
   return chunks.filter(c => c.length > 50)
 }
 
-// PDF'den metin çıkar (pdf-parse)
+// PDF'den metin çıkar
 async function extractText(buffer: Buffer, mimeType: string): Promise<string> {
-  if (mimeType === 'application/pdf' || mimeType === 'pdf') {
+  if (mimeType === 'application/pdf') {
     try {
-      const pdfParse = (await import('pdf-parse')).default
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const pdfParse = require('pdf-parse')
       const data = await pdfParse(buffer)
-      return data.text
+      return data.text || ''
     } catch {
       return ''
     }
