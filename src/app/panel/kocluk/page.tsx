@@ -13,7 +13,7 @@ const PROGRAMS = [
 
 export default function KoclukPage() {
   const [program, setProgram] = useState<string | null>(null)
-  const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string }[]>([])
+  const [messages, setMessages] = useState<{ role: 'user' | 'assistant'; content: string; tool_calls?: { tool: string; display: string }[] }[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -52,7 +52,7 @@ export default function KoclukPage() {
         body: JSON.stringify({ program, messages: [...messages, { role: 'user', content: userMsg }] }),
       })
       const data = await res.json()
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply || 'Bir hata oluştu.' }])
+      setMessages(prev => [...prev, { role: 'assistant', content: data.reply || 'Bir hata oluştu.', tool_calls: data.tool_calls || [] }])
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'Bağlantı hatası. Lütfen tekrar deneyin.' }])
     } finally {
@@ -104,16 +104,34 @@ export default function KoclukPage() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((m, i) => (
-          <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            {m.role === 'assistant' && (
-              <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold mr-2 flex-shrink-0 mt-0.5">AI</div>
+          <div key={i} className={`flex flex-col ${m.role === 'user' ? 'items-end' : 'items-start'}`}>
+            {m.role === 'assistant' && m.tool_calls && m.tool_calls.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mb-2 ml-9">
+                {m.tool_calls.map((tc, j) => {
+                  const icons: Record<string, string> = {
+                    get_my_performance: '📊', get_my_listings: '🏠', get_my_clients: '🤝',
+                    get_my_leads: '🎯', get_my_trainings: '📚', get_market_context: '📈', save_coaching_note: '💾',
+                  }
+                  return (
+                    <span key={j} className="flex items-center gap-1 text-xs bg-emerald-50 border border-emerald-100 text-emerald-700 px-2 py-1 rounded-full">
+                      <span>{icons[tc.tool] || '🔧'}</span>
+                      <span>{tc.display} alındı</span>
+                    </span>
+                  )
+                })}
+              </div>
             )}
-            <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl text-sm whitespace-pre-wrap ${
-              m.role === 'user'
-                ? 'bg-emerald-600 text-white rounded-br-sm'
-                : 'bg-white border border-gray-100 text-gray-800 rounded-bl-sm shadow-sm'
-            }`}>
-              {m.content}
+            <div className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} w-full`}>
+              {m.role === 'assistant' && (
+                <div className="w-7 h-7 rounded-full bg-emerald-600 text-white flex items-center justify-center text-xs font-bold mr-2 flex-shrink-0 mt-0.5">AI</div>
+              )}
+              <div className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl text-sm whitespace-pre-wrap ${
+                m.role === 'user'
+                  ? 'bg-emerald-600 text-white rounded-br-sm'
+                  : 'bg-white border border-gray-100 text-gray-800 rounded-bl-sm shadow-sm'
+              }`}>
+                {m.content}
+              </div>
             </div>
           </div>
         ))}
