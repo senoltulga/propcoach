@@ -21,11 +21,13 @@ function chunkText(text: string, size = 1000, overlap = 200): string[] {
 async function extractText(buffer: Buffer, mimeType: string): Promise<string> {
   if (mimeType === 'application/pdf') {
     try {
+      // pdf-parse alt modülünü kullan — Vercel'de test dosyası hatası önlenir
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const pdfParse = require('pdf-parse')
+      const pdfParse = require('pdf-parse/lib/pdf-parse.js')
       const data = await pdfParse(buffer)
       return data.text || ''
-    } catch {
+    } catch (e) {
+      console.error('PDF parse error:', e)
       return ''
     }
   }
@@ -56,7 +58,9 @@ export async function POST(req: NextRequest) {
     const text = await extractText(buffer, file.type)
 
     if (!text || text.trim().length < 20) {
-      return NextResponse.json({ error: 'Dosyadan metin çıkarılamadı' }, { status: 400 })
+      return NextResponse.json({
+        error: `Dosyadan metin çıkarılamadı. Dosya türü: ${file.type}, boyut: ${file.size} byte. PDF taranmış görsel ise metin içermez — düz metin PDF veya TXT kullanın.`
+      }, { status: 400 })
     }
 
     const chunks = chunkText(text)
