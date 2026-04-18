@@ -1,7 +1,18 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+const protectedRoutes = ['/dashboard', '/panel']
+const authRoutes = ['/giris', '/kayit']
+
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+  const isProtected = protectedRoutes.some((route) => pathname.startsWith(route))
+  const isAuthRoute = authRoutes.includes(pathname)
+
+  if (!isProtected && !isAuthRoute) {
+    return NextResponse.next()
+  }
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -9,7 +20,9 @@ export async function middleware(request: NextRequest) {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        getAll() { return request.cookies.getAll() },
+        getAll() {
+          return request.cookies.getAll()
+        },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({ request })
@@ -21,18 +34,15 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
-
-  // Korumalı sayfalar — giriş yapılmamışsa /giris'e yönlendir
-  const protectedRoutes = ['/dashboard', '/danismanlar', '/portfoy', '/ayarlar', '/kocluk']
-  const isProtected = protectedRoutes.some(r => request.nextUrl.pathname.startsWith(r))
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   if (isProtected && !user) {
     return NextResponse.redirect(new URL('/giris', request.url))
   }
 
-  // Giriş yapmış kullanıcı /giris veya /kayit'a giderse dashboard'a yönlendir
-  if (user && (request.nextUrl.pathname === '/giris' || request.nextUrl.pathname === '/kayit')) {
+  if (user && isAuthRoute) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
@@ -40,5 +50,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
+  matcher: ['/dashboard/:path*', '/panel/:path*', '/giris', '/kayit'],
 }
